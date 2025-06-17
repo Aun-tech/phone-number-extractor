@@ -3,21 +3,129 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Phone Number Extractor</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>📞 Phone Number Extractor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f7f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #0077cc;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 220px;
+      margin-bottom: 20px;
+      padding: 15px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      resize: vertical;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 18px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .copy-btn {
+      background-color: #28a745;
+      margin: 10px 0 20px 0;
+    }
+
+    .copy-btn:hover {
+      background-color: #218838;
+    }
+
+    #output {
+      margin-top: 30px;
+    }
+
+    #resultsList {
+      list-style-type: none;
+      padding: 0;
+      font-family: monospace;
+    }
+
+    #resultsList li {
+      background: #f9f9f9;
+      padding: 8px 12px;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1>📞 Phone Number Extractor</h1>
+
     <textarea id="inputText" placeholder="Paste your text block here..."></textarea>
     <button onclick="extractNumbers()">Extract Numbers</button>
-    
+
     <div id="output">
       <h2>Extracted Numbers:</h2>
       <button class="copy-btn" onclick="copyToClipboard()">📋 Copy All</button>
       <ul id="resultsList"></ul>
     </div>
   </div>
-  <script src="script.js"></script>
+
+  <script>
+    function extractNumbers() {
+      const text = document.getElementById("inputText").value;
+      const phoneRegex = /(\+92|0)?3[0-9]{9}/g;
+      const matches = text.match(phoneRegex) || [];
+
+      const seen = new Set();
+      const resultsList = document.getElementById("resultsList");
+      resultsList.innerHTML = "";
+
+      matches.forEach(number => {
+        let displayText = number;
+        if (seen.has(number)) {
+          displayText += " (duplicate)";
+        }
+        resultsList.innerHTML += `<li>${displayText}</li>`;
+        seen.add(number);
+      });
+    }
+
+    function copyToClipboard() {
+      const listItems = document.querySelectorAll("#resultsList li");
+      const textToCopy = Array.from(listItems).map(li => li.textContent).join("\n");
+
+      const textarea = document.createElement("textarea");
+      textarea.value = textToCopy;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+
+      alert("📋 All numbers copied to clipboard!");
+    }
+  </script>
 </body>
 </html>
