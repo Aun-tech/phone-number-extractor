@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📞 Phone Extractor</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="icon.png" />
-  <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet"/>
+  <title>📞 Supercharged Phone Extractor</title>
+
+  <!-- Toastify CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet" />
+
   <style>
     :root {
       --primary-color: #007bff;
@@ -126,6 +127,13 @@
       color: gray;
     }
 
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 13px;
+      color: gray;
+    }
+
     @media (max-width: 600px) {
       .container {
         padding: 20px;
@@ -137,11 +145,9 @@
   <div class="container">
     <h1>📞 Supercharged Phone Number Extractor</h1>
 
-    <!-- Input & File Upload -->
     <input type="file" id="fileInput" class="btn" aria-label="Upload file">
     <textarea id="inputText" placeholder="Paste your text here..."></textarea>
 
-    <!-- Buttons -->
     <div>
       <button class="btn btn-primary" id="extractBtn">Extract Numbers</button>
       <button class="btn btn-secondary" id="copyBtn">📋 Copy All</button>
@@ -149,23 +155,127 @@
       <button class="btn btn-secondary" id="themeToggle">🌓 Toggle Theme</button>
     </div>
 
-    <!-- Search -->
     <input type="text" id="searchInput" class="btn" placeholder="🔍 Search numbers...">
-
-    <!-- Stats -->
     <div class="stats" id="statsDisplay">Found: 0 numbers</div>
 
-    <!-- Output -->
     <div id="output">
       <ul id="resultsList"></ul>
     </div>
 
     <div class="footer">
-      <p>Made with ❤️ by <strong>Aun Raza Mohal</strong>. Optimized for Pakistani numbers.</p>
+      This tool only extracts <strong>Pakistani phone numbers</strong>. Made by <strong>Aun Raza Mohal</strong>.
     </div>
   </div>
 
   <button class="floating-btn" id="scrollTopBtn" title="Back to top">⬆️</button>
 
-  <!-- External Toast Library -->
+  <!-- Toastify JS -->
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+  <script>
+    const extractBtn = document.getElementById("extractBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const themeToggle = document.getElementById("themeToggle");
+    const fileInput = document.getElementById("fileInput");
+    const inputText = document.getElementById("inputText");
+    const resultsList = document.getElementById("resultsList");
+    const searchInput = document.getElementById("searchInput");
+    const statsDisplay = document.getElementById("statsDisplay");
+    const scrollTopBtn = document.getElementById("scrollTopBtn");
+
+    let extractedNumbers = [];
+
+    const phoneRegex = /(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g;
+
+    const showToast = (msg, color = "#007bff") => {
+      Toastify({
+        text: msg,
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: color
+      }).showToast();
+    };
+
+    function extractNumbers() {
+      const text = inputText.value;
+      const matches = [...new Set((text.match(phoneRegex) || []).map(num => num.replace(/[- ]/g, "").trim()))];
+      extractedNumbers = matches;
+      displayResults(matches);
+      updateStats();
+      showToast("📞 Extraction completed!");
+    }
+
+    function displayResults(numbers) {
+      resultsList.innerHTML = "";
+      numbers.forEach(num => {
+        const li = document.createElement("li");
+        li.textContent = num;
+        li.onclick = () => navigator.clipboard.writeText(num).then(() => showToast(`📋 Copied ${num}`));
+        resultsList.appendChild(li);
+      });
+    }
+
+    function copyToClipboard() {
+      if (extractedNumbers.length === 0) return showToast("⚠️ Nothing to copy!", "#dc3545");
+      navigator.clipboard.writeText(extractedNumbers.join("\n"))
+        .then(() => showToast("📋 Copied all numbers!"))
+        .catch(() => showToast("❌ Copy failed", "#dc3545"));
+    }
+
+    function exportToCSV() {
+      if (extractedNumbers.length === 0) return showToast("⚠️ No numbers to export.", "#dc3545");
+      const csv = "Phone Number\n" + extractedNumbers.join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "pakistani_numbers.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("⬇️ CSV Downloaded!");
+    }
+
+    function filterSearch() {
+      const query = searchInput.value.trim().toLowerCase();
+      const filtered = extractedNumbers.filter(num => num.toLowerCase().includes(query));
+      displayResults(filtered);
+    }
+
+    function updateStats() {
+      statsDisplay.textContent = `Found: ${extractedNumbers.length} number(s)`;
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("dark-mode");
+      localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark-mode");
+    }
+
+    extractBtn.onclick = extractNumbers;
+    copyBtn.onclick = copyToClipboard;
+    exportBtn.onclick = exportToCSV;
+    searchInput.oninput = filterSearch;
+    themeToggle.onclick = toggleTheme;
+    scrollTopBtn.onclick = scrollToTop;
+
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => inputText.value = reader.result;
+        reader.readAsText(file);
+      }
+    });
+  </script>
+</body>
+</html>
