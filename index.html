@@ -1,116 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📞 Phone Number Extractor</title>
+  <meta charset="UTF-8">
+  <title>🌍 Global Phone Number Extractor</title>
+  <script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.10.48/bundle/libphonenumber-max.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f2f7f8;
-      margin: 0;
+      background: #f4f6f9;
       padding: 20px;
     }
-
     .container {
       max-width: 900px;
       margin: auto;
       background: white;
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
-
     h1 {
       text-align: center;
-      color: #0077cc;
-      margin-bottom: 20px;
+      color: #0066cc;
     }
-
     textarea {
       width: 100%;
-      height: 220px;
-      margin-bottom: 20px;
-      padding: 15px;
+      height: 200px;
       font-size: 16px;
+      padding: 12px;
+      margin-bottom: 20px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      resize: vertical;
     }
-
     button {
-      background-color: #007bff;
-      color: white;
       padding: 12px 18px;
-      font-size: 16px;
+      background-color: #007bff;
       border: none;
       border-radius: 6px;
+      color: white;
+      font-size: 16px;
       cursor: pointer;
-      margin-top: 10px;
+      margin-bottom: 20px;
     }
-
     button:hover {
       background-color: #0056b3;
     }
-
-    .copy-btn {
-      background-color: #28a745;
-      margin: 10px 0 20px 0;
-    }
-
-    .copy-btn:hover {
-      background-color: #218838;
-    }
-
-    #output {
-      margin-top: 30px;
-    }
-
     #resultsList {
       list-style-type: none;
       padding: 0;
       font-family: monospace;
     }
-
     #resultsList li {
-      background: #f9f9f9;
+      background: #f8f8f8;
       padding: 8px 12px;
       border-bottom: 1px solid #ddd;
+    }
+    .copy-btn {
+      background-color: #28a745;
+      margin-top: 10px;
+    }
+    .copy-btn:hover {
+      background-color: #218838;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📞 Phone Number Extractor</h1>
-
-    <textarea id="inputText" placeholder="Paste your text block here..."></textarea>
-    <button onclick="extractNumbers()">Extract Numbers</button>
-
-    <div id="output">
-      <h2>Extracted Numbers:</h2>
-      <button class="copy-btn" onclick="copyToClipboard()">📋 Copy All</button>
-      <ul id="resultsList"></ul>
-    </div>
+    <h1>🌍 Global Phone Number Extractor</h1>
+    <textarea id="inputText" placeholder="Paste your international text block here..."></textarea>
+    <button onclick="extractPhoneNumbers()">Extract Phone Numbers</button>
+    <button class="copy-btn" onclick="copyToClipboard()">📋 Copy All</button>
+    <ul id="resultsList"></ul>
   </div>
 
   <script>
-    function extractNumbers() {
-      const text = document.getElementById("inputText").value;
-      const phoneRegex = /(\+92|0)?3[0-9]{9}/g;
-      const matches = text.match(phoneRegex) || [];
+    const { findNumbers } = libphonenumber;
 
-      const seen = new Set();
+    function extractPhoneNumbers() {
+      const inputText = document.getElementById("inputText").value;
       const resultsList = document.getElementById("resultsList");
       resultsList.innerHTML = "";
 
-      matches.forEach(number => {
-        let displayText = number;
-        if (seen.has(number)) {
-          displayText += " (duplicate)";
+      const matches = findNumbers(inputText, null, { v2: true });
+
+      const seen = new Set();
+      matches.forEach(({ number }) => {
+        const formatted = number.number;
+        let display = formatted;
+        if (seen.has(formatted)) {
+          display += " (duplicate)";
         }
-        resultsList.innerHTML += `<li>${displayText}</li>`;
-        seen.add(number);
+        seen.add(formatted);
+        const li = document.createElement("li");
+        li.textContent = display;
+        resultsList.appendChild(li);
       });
+
+      if (matches.length === 0) {
+        resultsList.innerHTML = "<li>No phone numbers found.</li>";
+      }
     }
 
     function copyToClipboard() {
@@ -124,7 +111,7 @@
       document.execCommand("copy");
       document.body.removeChild(textarea);
 
-      alert("📋 All numbers copied to clipboard!");
+      alert("📋 All extracted phone numbers copied!");
     }
   </script>
 </body>
