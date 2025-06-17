@@ -3,63 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>📞 Phone Number Extractor</title>
   <style>
+    :root {
+      --primary-color: #007bff;
+      --secondary-color: #28a745;
+      --bg-light: #f4f6f8;
+      --bg-dark: #1e1e1e;
+      --text-light: #ffffff;
+      --text-dark: #212529;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f7f8;
       margin: 0;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .dark-mode {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
     }
 
     .container {
       max-width: 900px;
-      margin: auto;
-      background: white;
+      margin: 40px auto;
+      background-color: white;
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark-mode .container {
+      background-color: #2c2c2c;
     }
 
     h1 {
       text-align: center;
-      color: #0077cc;
+      color: var(--primary-color);
       margin-bottom: 20px;
     }
 
     textarea {
       width: 100%;
-      height: 220px;
-      margin-bottom: 20px;
+      height: 180px;
       padding: 15px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 6px;
       resize: vertical;
+      margin-bottom: 20px;
     }
 
-    button {
-      background-color: #007bff;
-      color: white;
-      padding: 12px 18px;
+    .btn {
+      padding: 10px 20px;
       font-size: 16px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      margin-top: 10px;
+      margin: 5px;
     }
 
-    button:hover {
-      background-color: #0056b3;
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
     }
 
-    .copy-btn {
-      background-color: #28a745;
-      margin: 10px 0 20px 0;
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      color: white;
     }
 
-    .copy-btn:hover {
-      background-color: #218838;
+    .btn:hover {
+      opacity: 0.9;
     }
 
     #output {
@@ -67,7 +86,7 @@
     }
 
     #resultsList {
-      list-style-type: none;
+      list-style: none;
       padding: 0;
       font-family: monospace;
     }
@@ -77,55 +96,121 @@
       padding: 8px 12px;
       border-bottom: 1px solid #ddd;
     }
+
+    .dark-mode #resultsList li {
+      background: #3a3a3a;
+      color: #ddd;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 13px;
+      color: gray;
+    }
+
+    .search-box {
+      margin-top: 15px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" role="main">
     <h1>📞 Phone Number Extractor</h1>
 
-    <textarea id="inputText" placeholder="Paste your text block here..."></textarea>
-    <button onclick="extractNumbers()">Extract Numbers</button>
+    <textarea id="inputText" aria-label="Input Text Area" placeholder="Paste your text block here..."></textarea>
+    <div>
+      <button class="btn btn-primary" id="extractBtn">Extract Numbers</button>
+      <button class="btn btn-secondary" id="copyBtn">📋 Copy All</button>
+      <button class="btn btn-primary" id="exportBtn">⬇️ Export CSV</button>
+      <button class="btn btn-secondary" id="themeToggle">🌓 Toggle Theme</button>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="🔍 Search extracted numbers..." class="btn" style="width:100%; font-size:15px;" />
+    </div>
 
     <div id="output">
       <h2>Extracted Numbers:</h2>
-      <button class="copy-btn" onclick="copyToClipboard()">📋 Copy All</button>
-      <ul id="resultsList"></ul>
+      <ul id="resultsList" aria-label="Extracted phone numbers list"></ul>
+    </div>
+
+    <div class="footer">
+      This tool only extracts <strong>Pakistani phone numbers</strong>. Made by <strong>Aun Raza Mohal</strong>.
     </div>
   </div>
 
   <script>
+    const extractBtn = document.getElementById("extractBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const themeToggle = document.getElementById("themeToggle");
+    const inputText = document.getElementById("inputText");
+    const resultsList = document.getElementById("resultsList");
+    const searchInput = document.getElementById("searchInput");
+
+    let extractedNumbers = [];
+
+    const phoneRegex = /(?:\+92|0)?3\d{9}\b/g;
+
     function extractNumbers() {
-      const text = document.getElementById("inputText").value;
-      const phoneRegex = /(\+92|0)?3[0-9]{9}/g;
-      const matches = text.match(phoneRegex) || [];
+      const text = inputText.value;
+      const matches = [...new Set((text.match(phoneRegex) || []).map(num => num.trim()))];
 
-      const seen = new Set();
-      const resultsList = document.getElementById("resultsList");
+      extractedNumbers = matches;
+      displayResults(matches);
+    }
+
+    function displayResults(numbers) {
       resultsList.innerHTML = "";
-
-      matches.forEach(number => {
-        let displayText = number;
-        if (seen.has(number)) {
-          displayText += " (duplicate)";
-        }
-        resultsList.innerHTML += `<li>${displayText}</li>`;
-        seen.add(number);
+      numbers.forEach(num => {
+        const li = document.createElement("li");
+        li.textContent = num;
+        resultsList.appendChild(li);
       });
     }
 
     function copyToClipboard() {
-      const listItems = document.querySelectorAll("#resultsList li");
-      const textToCopy = Array.from(listItems).map(li => li.textContent).join("\n");
-
-      const textarea = document.createElement("textarea");
-      textarea.value = textToCopy;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-
-      alert("📋 All numbers copied to clipboard!");
+      if (extractedNumbers.length === 0) return alert("No numbers to copy.");
+      navigator.clipboard.writeText(extractedNumbers.join("\n"))
+        .then(() => alert("📋 Numbers copied to clipboard!"))
+        .catch(() => alert("Copy failed. Try manually."));
     }
+
+    function exportToCSV() {
+      if (extractedNumbers.length === 0) return alert("No numbers to export.");
+      const csvContent = "data:text/csv;charset=utf-8,Phone Number\n" + extractedNumbers.join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "pakistani_numbers.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function filterSearch() {
+      const query = searchInput.value.trim().toLowerCase();
+      const filtered = extractedNumbers.filter(num => num.toLowerCase().includes(query));
+      displayResults(filtered);
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("dark-mode");
+    }
+
+    // Event Listeners
+    extractBtn.addEventListener("click", extractNumbers);
+    copyBtn.addEventListener("click", copyToClipboard);
+    exportBtn.addEventListener("click", exportToCSV);
+    searchInput.addEventListener("input", filterSearch);
+    themeToggle.addEventListener("click", toggleTheme);
   </script>
 </body>
 </html>
