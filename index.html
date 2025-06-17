@@ -11,8 +11,10 @@
     <h1>📞 Phone Number Extractor</h1>
     <textarea id="inputText" placeholder="Paste your text block here..."></textarea>
     <button onclick="extractNumbers()">Extract Numbers</button>
+    
     <div id="output">
       <h2>Extracted Numbers:</h2>
+      <button class="copy-btn" onclick="copyToClipboard()">📋 Copy All</button>
       <ul id="resultsList"></ul>
     </div>
   </div>
