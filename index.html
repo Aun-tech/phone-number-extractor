@@ -1,262 +1,218 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📞 Phone Number Extractor Pro</title>
+  <title>📞 SmartPak Number Extractor</title>
   <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #007bff;
+      --accent: #28a745;
+      --bg-light: #f9fafe;
+      --bg-dark: #111;
+      --text-light: #fff;
+      --text-dark: #222;
+    }
+
     body {
-      font-family: 'Orbitron', sans-serif;
-      background-color: #0f0f1a;
-      color: #ffffff;
       margin: 0;
-      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
+
+    .dark-mode {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+    }
+
     .container {
+      max-width: 920px;
+      margin: 3rem auto;
+      background: #fff;
       padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      transition: background 0.3s ease;
     }
-    .dark-theme {
-      background-color: #1a1a2e;
-      color: #f0f0f0;
+    .dark-mode .container { background: #1e1e1e; }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
     }
-    .theme-toggle {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: linear-gradient(45deg, #00ffcc, #3366ff);
-      color: white;
+
+    textarea, input[type="file"], input[type="text"] {
+      width: 100%;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+
+    button.btn {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
       border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 0.4rem;
+      transition: transform 0.2s ease;
+    }
+    button.btn:hover { transform: scale(1.05); }
+
+    .btn-primary { background-color: var(--primary); color: #fff; }
+    .btn-secondary { background-color: var(--accent); color: #fff; }
+
+    .results {
+      background: #f1f3f5;
+      padding: 1rem;
+      border-radius: 10px;
+      max-height: 250px;
+      overflow-y: auto;
+      font-family: monospace;
+    }
+
+    .dark-mode .results { background: #2c2c2c; }
+
+    .results li {
+      padding: 0.5rem;
+      border-bottom: 1px solid #ddd;
       cursor: pointer;
     }
-    textarea {
-      width: 100%;
-      height: 150px;
-      background: #101820;
+
+    .stats, .footer {
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .floating-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary);
       color: #fff;
       border: none;
       padding: 1rem;
-      margin-bottom: 1rem;
-    }
-    .visual-section {
-      margin-top: 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-    }
-    .visual-section img {
-      max-width: 100%;
-      border-radius: 10px;
-      box-shadow: 0 0 20px #00ffcc;
-    }
-    ul#resultsList li {
-      list-style: none;
-      background: #202040;
-      margin-bottom: 0.5rem;
-      padding: 0.5rem;
-      border-radius: 8px;
+      border-radius: 50%;
       cursor: pointer;
+      font-size: 1.5rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
     }
-    .footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.85rem;
-      color: #aaa;
+
+    @media (max-width: 600px) {
+      .container { margin: 1rem; padding: 1rem; }
     }
   </style>
 </head>
 <body>
-  <button class="theme-toggle" id="themeBtn">🌓</button>
-  <div class="container">
-    <h1 class="text-center">📞 Phone Number Extractor Pro</h1>
-    <input type="file" id="fileInput" />
-    <textarea id="inputText" placeholder="Paste your text here..."></textarea>
-    <div class="d-flex flex-wrap gap-2 my-3">
-      <button id="extractBtn" class="btn btn-primary">Extract</button>
-      <button id="copyBtn" class="btn btn-secondary">Copy</button>
-      <button id="exportBtn" class="btn btn-success">Export CSV</button>
-      <button id="sortBtn" class="btn btn-info">Sort</button>
-      <button id="uniqueBtn" class="btn btn-warning">Remove Duplicates</button>
-      <button id="reverseBtn" class="btn btn-dark">Reverse List</button>
-      <button id="clearBtn" class="btn btn-danger">Clear</button>
-      <button id="statsBtn" class="btn btn-light">Show Stats</button>
-      <button id="selectBtn" class="btn btn-outline-light">Select All</button>
+  <div class="container animate__animated animate__fadeIn">
+    <h1>📞 SmartPak Number Extractor</h1>
+    <input type="file" id="fileInput">
+    <textarea id="inputText" placeholder="Paste text containing phone numbers..."></textarea>
+    <div>
+      <button class="btn btn-primary" id="extractBtn">Extract</button>
+      <button class="btn btn-secondary" id="copyBtn">📋 Copy</button>
+      <button class="btn btn-primary" id="exportBtn">⬇️ Export CSV</button>
+      <button class="btn btn-secondary" id="themeToggle">🌚 Toggle Theme</button>
     </div>
-    <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search..." />
-    <div id="stats">Found: 0</div>
-    <ul id="resultsList"></ul>
-    <div class="footer">Built for Pakistani phone number formats by Aun Raza Mohal.</div>
+    <input type="text" id="searchInput" placeholder="🔍 Filter results">
+    <ul class="results" id="resultsList"></ul>
+    <div class="stats" id="statsDisplay">0 numbers found</div>
+    <div class="footer">Designed for <strong>Pakistani</strong> numbers by <strong>Aun Raza Mohal</strong></div>
   </div>
-  <div class="visual-section">
-    <img src="https://source.unsplash.com/960x300/?cyberpunk,technology" alt="Hero" />
-    <img src="https://source.unsplash.com/960x300/?ai,data-stream" alt="Data Flow" />
-    <img src="https://source.unsplash.com/960x300/?hologram,smartphone" alt="Holographic Phone" />
-    <img src="https://source.unsplash.com/960x300/?machine-learning,brain,ai" alt="AI Brain" />
-    <img src="https://source.unsplash.com/960x300/?dashboard,charts,ui" alt="UI Chart" />
-  </div>
+  <button class="floating-btn" id="scrollTopBtn">⬆️</button>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script>
+    const phoneRegex = /(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g;
+    const fileInput = document.getElementById("fileInput");
+    const inputText = document.getElementById("inputText");
     const extractBtn = document.getElementById("extractBtn");
     const copyBtn = document.getElementById("copyBtn");
     const exportBtn = document.getElementById("exportBtn");
-    const fileInput = document.getElementById("fileInput");
-    const inputText = document.getElementById("inputText");
-    const resultsList = document.getElementById("resultsList");
     const searchInput = document.getElementById("searchInput");
-    const stats = document.getElementById("stats");
-    const sortBtn = document.getElementById("sortBtn");
-    const uniqueBtn = document.getElementById("uniqueBtn");
-    const reverseBtn = document.getElementById("reverseBtn");
-    const clearBtn = document.getElementById("clearBtn");
-    const statsBtn = document.getElementById("statsBtn");
-    const selectBtn = document.getElementById("selectBtn");
-    const themeBtn = document.getElementById("themeBtn");
-
+    const resultsList = document.getElementById("resultsList");
+    const statsDisplay = document.getElementById("statsDisplay");
+    const themeToggle = document.getElementById("themeToggle");
+    const scrollTopBtn = document.getElementById("scrollTopBtn");
     let extractedNumbers = [];
-    const phoneRegex = /(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g;
 
     const showToast = (msg, color = "#007bff") => {
       Toastify({ text: msg, duration: 3000, close: true, gravity: "top", position: "right", backgroundColor: color }).showToast();
     };
 
-    function extractContext(text) {
-      const lines = text.split(/[\n\r]+/);
-      const contextMatches = [];
-      lines.forEach(line => {
-        if (/\b(phone|contact|number|mobile)\b/i.test(line)) {
-          const match = line.match(phoneRegex);
-          if (match) {
-            contextMatches.push(...match.map(num => num.replace(/[- ]/g, "").trim()));
-          }
-        }
-      });
-      return contextMatches;
-    }
-
-    function extractNamedEntities(text) {
-      const namePhoneMap = {};
-      const lines = text.split(/[\n\r]+/);
-      lines.forEach(line => {
-        const numbers = line.match(phoneRegex);
-        if (numbers) {
-          const name = line.replace(phoneRegex, '').trim();
-          numbers.forEach(num => namePhoneMap[num.replace(/[- ]/g, '').trim()] = name);
-        }
-      });
-      return namePhoneMap;
-    }
-
-    function extractNumbers() {
-      const text = inputText.value;
-      const matches = [...new Set((text.match(phoneRegex) || []).map(num => num.replace(/[- ]/g, "").trim()))];
-      const contextExtracted = extractContext(text);
-      extractedNumbers = [...new Set([...matches, ...contextExtracted])];
-      const namedEntities = extractNamedEntities(text);
-      displayResults(extractedNumbers, namedEntities);
-      stats.textContent = `Found: ${extractedNumbers.length}`;
-      showToast("Extraction complete!");
-    }
-
-    function displayResults(numbers, namedEntities = {}) {
+    const displayResults = (numbers) => {
       resultsList.innerHTML = "";
       numbers.forEach(num => {
         const li = document.createElement("li");
-        li.textContent = namedEntities[num] ? `${num} → ${namedEntities[num]}` : num;
-        li.onclick = () => navigator.clipboard.writeText(num).then(() => showToast(`Copied ${num}`));
+        li.textContent = num;
+        li.onclick = () => navigator.clipboard.writeText(num).then(() => showToast(`📋 Copied ${num}`));
         resultsList.appendChild(li);
       });
-    }
+    };
 
-    function copyAll() {
-      if (extractedNumbers.length === 0) return showToast("Nothing to copy", "#dc3545");
-      navigator.clipboard.writeText(extractedNumbers.join("\n")).then(() => showToast("All numbers copied!"));
-    }
+    const updateStats = () => statsDisplay.textContent = `${extractedNumbers.length} number(s) found`;
 
-    function exportCSV() {
-      if (extractedNumbers.length === 0) return showToast("Nothing to export", "#dc3545");
-      const csv = "Phone Number\n" + extractedNumbers.join("\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const extractNumbers = () => {
+      const matches = [...new Set((inputText.value.match(phoneRegex) || []).map(num => num.replace(/[- ]/g, "")))];
+      extractedNumbers = matches;
+      displayResults(matches);
+      updateStats();
+      showToast("📞 Extraction complete");
+    };
+
+    const copyAll = () => {
+      if (!extractedNumbers.length) return showToast("Nothing to copy", "#dc3545");
+      navigator.clipboard.writeText(extractedNumbers.join("\n"))
+        .then(() => showToast("📋 Copied all!"));
+    };
+
+    const exportCSV = () => {
+      if (!extractedNumbers.length) return showToast("Nothing to export", "#dc3545");
+      const blob = new Blob(["Phone Number\n" + extractedNumbers.join("\n")], { type: "text/csv" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "phone_numbers.csv";
-      document.body.appendChild(link);
+      link.download = "pakistani_numbers.csv";
       link.click();
-      document.body.removeChild(link);
-      showToast("CSV Downloaded");
-    }
+      showToast("⬇️ Downloaded CSV");
+    };
 
-    function filterResults() {
-      const query = searchInput.value.trim().toLowerCase();
-      const filtered = extractedNumbers.filter(num => num.toLowerCase().includes(query));
-      displayResults(filtered);
-    }
+    const filterResults = () => {
+      const q = searchInput.value.toLowerCase();
+      displayResults(extractedNumbers.filter(num => num.includes(q)));
+    };
 
-    function sortNumbers() {
-      extractedNumbers.sort();
-      displayResults(extractedNumbers);
-    }
+    const toggleTheme = () => {
+      document.body.classList.toggle("dark-mode");
+      localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+    };
 
-    function uniqueNumbers() {
-      extractedNumbers = [...new Set(extractedNumbers)];
-      displayResults(extractedNumbers);
-    }
+    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    function reverseNumbers() {
-      extractedNumbers.reverse();
-      displayResults(extractedNumbers);
-    }
-
-    function clearAll() {
-      extractedNumbers = [];
-      inputText.value = "";
-      searchInput.value = "";
-      resultsList.innerHTML = "";
-      stats.textContent = "Found: 0";
-      showToast("Cleared all data");
-    }
-
-    function showStats() {
-      showToast(`Total: ${extractedNumbers.length}`);
-    }
-
-    function selectAllText() {
-      inputText.select();
-    }
-
-    function toggleTheme() {
-      document.body.classList.toggle("dark-theme");
-      localStorage.setItem("theme", document.body.classList.contains("dark-theme") ? "dark" : "light");
-    }
-
-    if (localStorage.getItem("theme") === "dark") {
-      document.body.classList.add("dark-theme");
-    }
+    if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
 
     extractBtn.onclick = extractNumbers;
     copyBtn.onclick = copyAll;
     exportBtn.onclick = exportCSV;
     searchInput.oninput = filterResults;
-    sortBtn.onclick = sortNumbers;
-    uniqueBtn.onclick = uniqueNumbers;
-    reverseBtn.onclick = reverseNumbers;
-    clearBtn.onclick = clearAll;
-    statsBtn.onclick = showStats;
-    selectBtn.onclick = selectAllText;
-    themeBtn.onclick = toggleTheme;
+    themeToggle.onclick = toggleTheme;
+    scrollTopBtn.onclick = scrollToTop;
 
-    fileInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = () => inputText.value = reader.result;
-        reader.readAsText(file);
-      }
-    });
+    fileInput.onchange = e => {
+      const reader = new FileReader();
+      reader.onload = () => inputText.value = reader.result;
+      reader.readAsText(e.target.files[0]);
+    };
   </script>
 </body>
 </html>
