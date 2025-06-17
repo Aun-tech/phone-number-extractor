@@ -3,26 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>📞 Supercharged Phone Number Extractor</title>
+  <title>📞 Supercharged Phone Extractor</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.png" />
+  <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet"/>
   <style>
     :root {
       --primary-color: #007bff;
       --secondary-color: #28a745;
       --bg-light: #f4f6f8;
-      --bg-dark: #1e1e1e;
+      --bg-dark: #121212;
       --text-light: #ffffff;
       --text-dark: #212529;
-      --highlight-color: #ffdd57;
+      --highlight-color: #ffeb3b;
     }
 
     body {
-      margin: 0;
       font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
       background-color: var(--bg-light);
       color: var(--text-dark);
-      transition: background-color 0.3s, color 0.3s;
-      overflow-x: hidden;
+      transition: all 0.3s ease;
     }
 
     .dark-mode {
@@ -36,38 +38,35 @@
       background-color: white;
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
 
     .dark-mode .container {
-      background-color: #2c2c2c;
+      background-color: #1f1f1f;
     }
 
     h1 {
       text-align: center;
       color: var(--primary-color);
-      margin-bottom: 20px;
     }
 
     textarea, input[type="file"] {
       width: 100%;
-      height: 180px;
       padding: 15px;
-      font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      resize: vertical;
       margin-bottom: 20px;
+      font-size: 16px;
     }
 
     .btn {
       padding: 10px 20px;
-      font-size: 16px;
+      font-size: 15px;
+      margin: 5px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      margin: 5px;
+      transition: 0.2s;
     }
 
     .btn-primary {
@@ -92,16 +91,15 @@
       list-style: none;
       padding: 0;
       font-family: monospace;
-      max-height: 300px;
+      max-height: 250px;
       overflow-y: auto;
+      background-color: #fafafa;
+      border-radius: 6px;
     }
 
     #resultsList li {
-      background: #f9f9f9;
-      padding: 8px 12px;
-      border-bottom: 1px solid #ddd;
-      border-radius: 6px;
-      margin-bottom: 5px;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
       cursor: pointer;
     }
 
@@ -110,28 +108,22 @@
       font-weight: bold;
     }
 
-    .footer {
-      text-align: center;
-      margin-top: 40px;
-      font-size: 13px;
-      color: gray;
-    }
-
-    .search-box {
-      margin-top: 15px;
-    }
-
     .floating-btn {
       position: fixed;
-      bottom: 30px;
-      right: 30px;
-      padding: 15px;
+      bottom: 20px;
+      right: 20px;
       background-color: var(--primary-color);
       color: white;
       border-radius: 50%;
-      font-size: 18px;
+      padding: 15px;
+      font-size: 20px;
       cursor: pointer;
-      z-index: 100;
+    }
+
+    .stats {
+      margin-top: 15px;
+      font-size: 14px;
+      color: gray;
     }
 
     @media (max-width: 600px) {
@@ -142,145 +134,38 @@
   </style>
 </head>
 <body>
-  <div class="container" role="main">
+  <div class="container">
     <h1>📞 Supercharged Phone Number Extractor</h1>
 
-    <!-- File Upload and Textarea Input -->
-    <input type="file" id="fileInput" class="btn" aria-label="Upload file" />
-    <textarea id="inputText" aria-label="Input Text Area" placeholder="Paste your text block here..."></textarea>
+    <!-- Input & File Upload -->
+    <input type="file" id="fileInput" class="btn" aria-label="Upload file">
+    <textarea id="inputText" placeholder="Paste your text here..."></textarea>
 
     <!-- Buttons -->
     <div>
-      <button class="btn btn-primary" id="extractBtn" title="Extract phone numbers">Extract Numbers</button>
-      <button class="btn btn-secondary" id="copyBtn" title="Copy all extracted numbers">📋 Copy All</button>
-      <button class="btn btn-primary" id="exportBtn" title="Export to CSV/JSON/Excel">⬇️ Export</button>
-      <button class="btn btn-secondary" id="themeToggle" title="Toggle dark/light mode">🌓 Toggle Theme</button>
+      <button class="btn btn-primary" id="extractBtn">Extract Numbers</button>
+      <button class="btn btn-secondary" id="copyBtn">📋 Copy All</button>
+      <button class="btn btn-primary" id="exportBtn">⬇️ Export</button>
+      <button class="btn btn-secondary" id="themeToggle">🌓 Toggle Theme</button>
     </div>
 
-    <!-- Search Box -->
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="🔍 Search extracted numbers..." class="btn" style="width:100%; font-size:15px;" />
-    </div>
+    <!-- Search -->
+    <input type="text" id="searchInput" class="btn" placeholder="🔍 Search numbers...">
 
-    <!-- Output Section -->
+    <!-- Stats -->
+    <div class="stats" id="statsDisplay">Found: 0 numbers</div>
+
+    <!-- Output -->
     <div id="output">
-      <h2>Extracted Numbers:</h2>
-      <ul id="resultsList" aria-label="Extracted phone numbers list"></ul>
+      <ul id="resultsList"></ul>
     </div>
 
     <div class="footer">
-      This tool only extracts <strong>Pakistani phone numbers</strong>. Made by <strong>Aun Raza Mohal</strong>.
+      <p>Made with ❤️ by <strong>Aun Raza Mohal</strong>. Optimized for Pakistani numbers.</p>
     </div>
   </div>
 
   <button class="floating-btn" id="scrollTopBtn" title="Back to top">⬆️</button>
 
-  <script>
-    const extractBtn = document.getElementById("extractBtn");
-    const copyBtn = document.getElementById("copyBtn");
-    const exportBtn = document.getElementById("exportBtn");
-    const themeToggle = document.getElementById("themeToggle");
-    const fileInput = document.getElementById("fileInput");
-    const inputText = document.getElementById("inputText");
-    const resultsList = document.getElementById("resultsList");
-    const searchInput = document.getElementById("searchInput");
-    const scrollTopBtn = document.getElementById("scrollTopBtn");
-
-    let extractedNumbers = [];
-
-    // Regex for extracting Pakistani phone numbers
-    const phoneRegex = /(?:\+92|0)?3\d{9}\b/g;
-
-    // Extract numbers from input text
-    function extractNumbers() {
-      const text = inputText.value;
-      const matches = [...new Set((text.match(phoneRegex) || []).map(num => num.trim()))];
-
-      extractedNumbers = matches;
-      displayResults(matches);
-    }
-
-    // Display numbers in the list
-    function displayResults(numbers) {
-      resultsList.innerHTML = "";
-      numbers.forEach(num => {
-        const li = document.createElement("li");
-        li.textContent = num;
-        li.addEventListener("click", () => alert(`You clicked on ${num}`)); // Handle click
-        resultsList.appendChild(li);
-      });
-    }
-
-    // Copy to Clipboard
-    function copyToClipboard() {
-      if (extractedNumbers.length === 0) return alert("No numbers to copy.");
-      navigator.clipboard.writeText(extractedNumbers.join("\n"))
-        .then(() => alert("📋 Numbers copied to clipboard!"))
-        .catch(() => alert("Copy failed. Try manually."));
-    }
-
-    // Export to CSV/JSON/Excel
-    function exportToCSV() {
-      if (extractedNumbers.length === 0) return alert("No numbers to export.");
-      const csvContent = "data:text/csv;charset=utf-8,Phone Number\n" + extractedNumbers.join("\n");
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "pakistani_numbers.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    // Search Filter
-    function filterSearch() {
-      const query = searchInput.value.trim().toLowerCase();
-      const filtered = extractedNumbers.filter(num => num.toLowerCase().includes(query));
-      displayResults(filtered);
-
-      // Highlight matched items
-      document.querySelectorAll("li").forEach(li => {
-        if (li.textContent.toLowerCase().includes(query)) {
-          li.classList.add("highlight");
-        } else {
-          li.classList.remove("highlight");
-        }
-      });
-    }
-
-    // Theme toggle (Light/Dark Mode)
-    function toggleTheme() {
-      document.body.classList.toggle("dark-mode");
-      localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
-    }
-
-    // Scroll to top button
-    function scrollToTop() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Load saved theme preference
-    if (localStorage.getItem("theme") === "dark") {
-      document.body.classList.add("dark-mode");
-    }
-
-    // Event Listeners
-    extractBtn.addEventListener("click", extractNumbers);
-    copyBtn.addEventListener("click", copyToClipboard);
-    exportBtn.addEventListener("click", exportToCSV);
-    searchInput.addEventListener("input", filterSearch);
-    themeToggle.addEventListener("click", toggleTheme);
-    scrollTopBtn.addEventListener("click", scrollToTop);
-    fileInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          inputText.value = reader.result;
-        };
-        reader.readAsText(file);
-      }
-    });
-  </script>
-</body>
-</html>
+  <!-- External Toast Library -->
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
