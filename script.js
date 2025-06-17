@@ -1,0 +1,21 @@
+function extractNumbers() {
+  const text = document.getElementById("inputText").value;
+  const phoneRegex = /(\+92|0)?3[0-9]{9}/g;
+  const matches = [...text.matchAll(phoneRegex)].map(m => m[0]);
+
+  const resultsList = document.getElementById("resultsList");
+  resultsList.innerHTML = "";
+
+  const seen = {};
+  matches.forEach(number => {
+    let display = number;
+    if (seen[number]) {
+      display += " (duplicate)";
+    } else {
+      seen[number] = true;
+    }
+    const li = document.createElement("li");
+    li.textContent = display;
+    resultsList.appendChild(li);
+  });
+}
