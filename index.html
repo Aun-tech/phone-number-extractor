@@ -2,30 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📞 Supercharged Phone Extractor</title>
-
-  <!-- Toastify CSS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📞 SmartPak Number Extractor</title>
   <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet" />
-
+  <link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #007bff;
-      --secondary-color: #28a745;
-      --bg-light: #f4f6f8;
-      --bg-dark: #121212;
-      --text-light: #ffffff;
-      --text-dark: #212529;
-      --highlight-color: #ffeb3b;
+      --primary: #007bff;
+      --accent: #28a745;
+      --bg-light: #f9fafe;
+      --bg-dark: #111;
+      --text-light: #fff;
+      --text-dark: #222;
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 0;
+      font-family: 'Inter', sans-serif;
       background-color: var(--bg-light);
       color: var(--text-dark);
-      transition: all 0.3s ease;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .dark-mode {
@@ -34,181 +31,126 @@
     }
 
     .container {
-      max-width: 900px;
-      margin: 40px auto;
-      background-color: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      max-width: 920px;
+      margin: 3rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      transition: background 0.3s ease;
     }
-
-    .dark-mode .container {
-      background-color: #1f1f1f;
-    }
+    .dark-mode .container { background: #1e1e1e; }
 
     h1 {
       text-align: center;
-      color: var(--primary-color);
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
     }
 
-    textarea, input[type="file"] {
+    textarea, input[type="file"], input[type="text"] {
       width: 100%;
-      padding: 15px;
+      padding: 1rem;
+      margin-bottom: 1rem;
       border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      font-size: 16px;
+      border-radius: 10px;
+      font-size: 1rem;
     }
 
-    .btn {
-      padding: 10px 20px;
-      font-size: 15px;
-      margin: 5px;
+    button.btn {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: 0.2s;
+      margin: 0.4rem;
+      transition: transform 0.2s ease;
     }
+    button.btn:hover { transform: scale(1.05); }
 
-    .btn-primary {
-      background-color: var(--primary-color);
-      color: white;
-    }
+    .btn-primary { background-color: var(--primary); color: #fff; }
+    .btn-secondary { background-color: var(--accent); color: #fff; }
 
-    .btn-secondary {
-      background-color: var(--secondary-color);
-      color: white;
-    }
-
-    .btn:hover {
-      opacity: 0.9;
-    }
-
-    #output {
-      margin-top: 30px;
-    }
-
-    #resultsList {
-      list-style: none;
-      padding: 0;
-      font-family: monospace;
+    .results {
+      background: #f1f3f5;
+      padding: 1rem;
+      border-radius: 10px;
       max-height: 250px;
       overflow-y: auto;
-      background-color: #fafafa;
-      border-radius: 6px;
+      font-family: monospace;
     }
 
-    #resultsList li {
-      padding: 10px;
-      border-bottom: 1px solid #eee;
+    .dark-mode .results { background: #2c2c2c; }
+
+    .results li {
+      padding: 0.5rem;
+      border-bottom: 1px solid #ddd;
       cursor: pointer;
     }
 
-    .highlight {
-      background-color: var(--highlight-color);
-      font-weight: bold;
+    .stats, .footer {
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      margin-top: 1rem;
     }
 
     .floating-btn {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background-color: var(--primary-color);
-      color: white;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 1rem;
       border-radius: 50%;
-      padding: 15px;
-      font-size: 20px;
       cursor: pointer;
-    }
-
-    .stats {
-      margin-top: 15px;
-      font-size: 14px;
-      color: gray;
-    }
-
-    .footer {
-      text-align: center;
-      margin-top: 40px;
-      font-size: 13px;
-      color: gray;
+      font-size: 1.5rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
     }
 
     @media (max-width: 600px) {
-      .container {
-        padding: 20px;
-      }
+      .container { margin: 1rem; padding: 1rem; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📞 Supercharged Phone Number Extractor</h1>
-
-    <input type="file" id="fileInput" class="btn" aria-label="Upload file">
-    <textarea id="inputText" placeholder="Paste your text here..."></textarea>
-
+  <div class="container animate__animated animate__fadeIn">
+    <h1>📞 SmartPak Number Extractor</h1>
+    <input type="file" id="fileInput">
+    <textarea id="inputText" placeholder="Paste text containing phone numbers..."></textarea>
     <div>
-      <button class="btn btn-primary" id="extractBtn">Extract Numbers</button>
-      <button class="btn btn-secondary" id="copyBtn">📋 Copy All</button>
-      <button class="btn btn-primary" id="exportBtn">⬇️ Export</button>
-      <button class="btn btn-secondary" id="themeToggle">🌓 Toggle Theme</button>
+      <button class="btn btn-primary" id="extractBtn">Extract</button>
+      <button class="btn btn-secondary" id="copyBtn">📋 Copy</button>
+      <button class="btn btn-primary" id="exportBtn">⬇️ Export CSV</button>
+      <button class="btn btn-secondary" id="themeToggle">🌚 Toggle Theme</button>
     </div>
-
-    <input type="text" id="searchInput" class="btn" placeholder="🔍 Search numbers...">
-    <div class="stats" id="statsDisplay">Found: 0 numbers</div>
-
-    <div id="output">
-      <ul id="resultsList"></ul>
-    </div>
-
-    <div class="footer">
-      This tool only extracts <strong>Pakistani phone numbers</strong>. Made by <strong>Aun Raza Mohal</strong>.
-    </div>
+    <input type="text" id="searchInput" placeholder="🔍 Filter results">
+    <ul class="results" id="resultsList"></ul>
+    <div class="stats" id="statsDisplay">0 numbers found</div>
+    <div class="footer">Designed for <strong>Pakistani</strong> numbers by <strong>Aun Raza Mohal</strong></div>
   </div>
-
-  <button class="floating-btn" id="scrollTopBtn" title="Back to top">⬆️</button>
-
-  <!-- Toastify JS -->
+  <button class="floating-btn" id="scrollTopBtn">⬆️</button>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
   <script>
+    const phoneRegex = /(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g;
+    const fileInput = document.getElementById("fileInput");
+    const inputText = document.getElementById("inputText");
     const extractBtn = document.getElementById("extractBtn");
     const copyBtn = document.getElementById("copyBtn");
     const exportBtn = document.getElementById("exportBtn");
-    const themeToggle = document.getElementById("themeToggle");
-    const fileInput = document.getElementById("fileInput");
-    const inputText = document.getElementById("inputText");
-    const resultsList = document.getElementById("resultsList");
     const searchInput = document.getElementById("searchInput");
+    const resultsList = document.getElementById("resultsList");
     const statsDisplay = document.getElementById("statsDisplay");
+    const themeToggle = document.getElementById("themeToggle");
     const scrollTopBtn = document.getElementById("scrollTopBtn");
-
     let extractedNumbers = [];
 
-    const phoneRegex = /(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g;
-
     const showToast = (msg, color = "#007bff") => {
-      Toastify({
-        text: msg,
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: color
-      }).showToast();
+      Toastify({ text: msg, duration: 3000, close: true, gravity: "top", position: "right", backgroundColor: color }).showToast();
     };
 
-    function extractNumbers() {
-      const text = inputText.value;
-      const matches = [...new Set((text.match(phoneRegex) || []).map(num => num.replace(/[- ]/g, "").trim()))];
-      extractedNumbers = matches;
-      displayResults(matches);
-      updateStats();
-      showToast("📞 Extraction completed!");
-    }
-
-    function displayResults(numbers) {
+    const displayResults = (numbers) => {
       resultsList.innerHTML = "";
       numbers.forEach(num => {
         const li = document.createElement("li");
@@ -216,66 +158,60 @@
         li.onclick = () => navigator.clipboard.writeText(num).then(() => showToast(`📋 Copied ${num}`));
         resultsList.appendChild(li);
       });
-    }
+    };
 
-    function copyToClipboard() {
-      if (extractedNumbers.length === 0) return showToast("⚠️ Nothing to copy!", "#dc3545");
+    const updateStats = () => statsDisplay.textContent = `${extractedNumbers.length} number(s) found`;
+
+    const extractNumbers = () => {
+      const matches = [...new Set((inputText.value.match(phoneRegex) || []).map(num => num.replace(/[- ]/g, "")))];
+      extractedNumbers = matches;
+      displayResults(matches);
+      updateStats();
+      showToast("📞 Extraction complete");
+    };
+
+    const copyAll = () => {
+      if (!extractedNumbers.length) return showToast("Nothing to copy", "#dc3545");
       navigator.clipboard.writeText(extractedNumbers.join("\n"))
-        .then(() => showToast("📋 Copied all numbers!"))
-        .catch(() => showToast("❌ Copy failed", "#dc3545"));
-    }
+        .then(() => showToast("📋 Copied all!"));
+    };
 
-    function exportToCSV() {
-      if (extractedNumbers.length === 0) return showToast("⚠️ No numbers to export.", "#dc3545");
-      const csv = "Phone Number\n" + extractedNumbers.join("\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const exportCSV = () => {
+      if (!extractedNumbers.length) return showToast("Nothing to export", "#dc3545");
+      const blob = new Blob(["Phone Number\n" + extractedNumbers.join("\n")], { type: "text/csv" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "pakistani_numbers.csv";
-      document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      showToast("⬇️ CSV Downloaded!");
-    }
+      showToast("⬇️ Downloaded CSV");
+    };
 
-    function filterSearch() {
-      const query = searchInput.value.trim().toLowerCase();
-      const filtered = extractedNumbers.filter(num => num.toLowerCase().includes(query));
-      displayResults(filtered);
-    }
+    const filterResults = () => {
+      const q = searchInput.value.toLowerCase();
+      displayResults(extractedNumbers.filter(num => num.includes(q)));
+    };
 
-    function updateStats() {
-      statsDisplay.textContent = `Found: ${extractedNumbers.length} number(s)`;
-    }
-
-    function toggleTheme() {
+    const toggleTheme = () => {
       document.body.classList.toggle("dark-mode");
       localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
-    }
+    };
 
-    function scrollToTop() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (localStorage.getItem("theme") === "dark") {
-      document.body.classList.add("dark-mode");
-    }
+    if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
 
     extractBtn.onclick = extractNumbers;
-    copyBtn.onclick = copyToClipboard;
-    exportBtn.onclick = exportToCSV;
-    searchInput.oninput = filterSearch;
+    copyBtn.onclick = copyAll;
+    exportBtn.onclick = exportCSV;
+    searchInput.oninput = filterResults;
     themeToggle.onclick = toggleTheme;
     scrollTopBtn.onclick = scrollToTop;
 
-    fileInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = () => inputText.value = reader.result;
-        reader.readAsText(file);
-      }
-    });
+    fileInput.onchange = e => {
+      const reader = new FileReader();
+      reader.onload = () => inputText.value = reader.result;
+      reader.readAsText(e.target.files[0]);
+    };
   </script>
 </body>
 </html>
