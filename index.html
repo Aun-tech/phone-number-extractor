@@ -1,46 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Phone Number Extractor</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    textarea { width: 100%; height: 200px; }
-    button { padding: 10px 20px; margin-top: 10px; }
-    pre { background: #f0f0f0; padding: 15px; white-space: pre-wrap; }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-  <h2>Phone Number Extractor</h2>
-  <textarea id="inputText" placeholder="Paste your data block here..."></textarea>
-  <br>
-  <button onclick="extractNumbers()">Extract Phone Numbers</button>
-
-  <h3>Extracted Phone Numbers:</h3>
-  <pre id="output"></pre>
-
-  <script>
-    function extractNumbers() {
-      const text = document.getElementById('inputText').value;
-      const phoneRegex = /(?:\+92|0)?3\d{9}/g;
-      const matches = text.match(phoneRegex) || [];
-
-      const seen = new Set();
-      const output = [];
-
-      matches.forEach(num => {
-        if (seen.has(num)) {
-          output.push(num + ' (duplicate)');
-        } else {
-          output.push(num);
-          seen.add(num);
-        }
-      });
-
-      document.getElementById('output').textContent = output.join('\n');
-    }
-  </script>
-
+  <div class="container">
+    <h1>📞 Phone Number Extractor</h1>
+    <textarea id="inputText" placeholder="Paste your text block here..."></textarea>
+    <button onclick="extractNumbers()">Extract Numbers</button>
+    <div id="output">
+      <h2>Extracted Numbers:</h2>
+      <ul id="resultsList"></ul>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
