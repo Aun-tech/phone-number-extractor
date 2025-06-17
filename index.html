@@ -5,81 +5,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>📞 Phone Number Extractor Pro</title>
   <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Orbitron', sans-serif;
+      background-color: #0f0f1a;
+      color: #ffffff;
       margin: 0;
       padding: 0;
-      background-color: #f4f6f8;
-      color: #212529;
     }
     .container {
-      max-width: 900px;
-      margin: 40px auto;
-      background-color: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
     }
-    textarea, input[type="file"], input[type="text"] {
-      width: 100%;
-      padding: 15px;
-      margin-bottom: 20px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+    .dark-theme {
+      background-color: #1a1a2e;
+      color: #f0f0f0;
     }
-    button {
-      padding: 10px 20px;
-      margin: 5px;
-      font-size: 15px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background-color: #007bff;
+    .theme-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: linear-gradient(45deg, #00ffcc, #3366ff);
       color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      cursor: pointer;
     }
-    button:hover {
-      opacity: 0.9;
+    textarea {
+      width: 100%;
+      height: 150px;
+      background: #101820;
+      color: #fff;
+      border: none;
+      padding: 1rem;
+      margin-bottom: 1rem;
     }
-    ul {
+    .visual-section {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .visual-section img {
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #00ffcc;
+    }
+    ul#resultsList li {
       list-style: none;
-      padding: 0;
-      max-height: 250px;
-      overflow-y: auto;
-      background-color: #fafafa;
-      border-radius: 6px;
-      font-family: monospace;
-    }
-    li {
-      padding: 10px;
-      border-bottom: 1px solid #eee;
+      background: #202040;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 8px;
       cursor: pointer;
     }
     .footer {
       text-align: center;
-      margin-top: 40px;
-      font-size: 13px;
-      color: gray;
+      padding: 1rem;
+      font-size: 0.85rem;
+      color: #aaa;
     }
   </style>
 </head>
 <body>
+  <button class="theme-toggle" id="themeBtn">🌓</button>
   <div class="container">
-    <h1>📞 Phone Number Extractor Pro</h1>
+    <h1 class="text-center">📞 Phone Number Extractor Pro</h1>
     <input type="file" id="fileInput" />
     <textarea id="inputText" placeholder="Paste your text here..."></textarea>
-    <div>
-      <button id="extractBtn">Extract</button>
-      <button id="copyBtn">Copy</button>
-      <button id="exportBtn">Export CSV</button>
+    <div class="d-flex flex-wrap gap-2 my-3">
+      <button id="extractBtn" class="btn btn-primary">Extract</button>
+      <button id="copyBtn" class="btn btn-secondary">Copy</button>
+      <button id="exportBtn" class="btn btn-success">Export CSV</button>
+      <button id="sortBtn" class="btn btn-info">Sort</button>
+      <button id="uniqueBtn" class="btn btn-warning">Remove Duplicates</button>
+      <button id="reverseBtn" class="btn btn-dark">Reverse List</button>
+      <button id="clearBtn" class="btn btn-danger">Clear</button>
+      <button id="statsBtn" class="btn btn-light">Show Stats</button>
+      <button id="selectBtn" class="btn btn-outline-light">Select All</button>
     </div>
-    <input type="text" id="searchInput" placeholder="Search..." />
+    <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search..." />
     <div id="stats">Found: 0</div>
     <ul id="resultsList"></ul>
-    <div class="footer">
-      Built for Pakistani phone number formats by Aun Raza Mohal.
-    </div>
+    <div class="footer">Built for Pakistani phone number formats by Aun Raza Mohal.</div>
+  </div>
+  <div class="visual-section">
+    <img src="https://source.unsplash.com/960x300/?cyberpunk,technology" alt="Hero" />
+    <img src="https://source.unsplash.com/960x300/?ai,data-stream" alt="Data Flow" />
+    <img src="https://source.unsplash.com/960x300/?hologram,smartphone" alt="Holographic Phone" />
+    <img src="https://source.unsplash.com/960x300/?machine-learning,brain,ai" alt="AI Brain" />
+    <img src="https://source.unsplash.com/960x300/?dashboard,charts,ui" alt="UI Chart" />
   </div>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script>
@@ -91,36 +109,64 @@
     const resultsList = document.getElementById("resultsList");
     const searchInput = document.getElementById("searchInput");
     const stats = document.getElementById("stats");
+    const sortBtn = document.getElementById("sortBtn");
+    const uniqueBtn = document.getElementById("uniqueBtn");
+    const reverseBtn = document.getElementById("reverseBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const statsBtn = document.getElementById("statsBtn");
+    const selectBtn = document.getElementById("selectBtn");
+    const themeBtn = document.getElementById("themeBtn");
 
     let extractedNumbers = [];
-
     const phoneRegex = /(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g;
 
     const showToast = (msg, color = "#007bff") => {
-      Toastify({
-        text: msg,
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: color
-      }).showToast();
+      Toastify({ text: msg, duration: 3000, close: true, gravity: "top", position: "right", backgroundColor: color }).showToast();
     };
+
+    function extractContext(text) {
+      const lines = text.split(/[\n\r]+/);
+      const contextMatches = [];
+      lines.forEach(line => {
+        if (/\b(phone|contact|number|mobile)\b/i.test(line)) {
+          const match = line.match(phoneRegex);
+          if (match) {
+            contextMatches.push(...match.map(num => num.replace(/[- ]/g, "").trim()));
+          }
+        }
+      });
+      return contextMatches;
+    }
+
+    function extractNamedEntities(text) {
+      const namePhoneMap = {};
+      const lines = text.split(/[\n\r]+/);
+      lines.forEach(line => {
+        const numbers = line.match(phoneRegex);
+        if (numbers) {
+          const name = line.replace(phoneRegex, '').trim();
+          numbers.forEach(num => namePhoneMap[num.replace(/[- ]/g, '').trim()] = name);
+        }
+      });
+      return namePhoneMap;
+    }
 
     function extractNumbers() {
       const text = inputText.value;
       const matches = [...new Set((text.match(phoneRegex) || []).map(num => num.replace(/[- ]/g, "").trim()))];
-      extractedNumbers = matches;
-      displayResults(matches);
-      stats.textContent = `Found: ${matches.length}`;
+      const contextExtracted = extractContext(text);
+      extractedNumbers = [...new Set([...matches, ...contextExtracted])];
+      const namedEntities = extractNamedEntities(text);
+      displayResults(extractedNumbers, namedEntities);
+      stats.textContent = `Found: ${extractedNumbers.length}`;
       showToast("Extraction complete!");
     }
 
-    function displayResults(numbers) {
+    function displayResults(numbers, namedEntities = {}) {
       resultsList.innerHTML = "";
       numbers.forEach(num => {
         const li = document.createElement("li");
-        li.textContent = num;
+        li.textContent = namedEntities[num] ? `${num} → ${namedEntities[num]}` : num;
         li.onclick = () => navigator.clipboard.writeText(num).then(() => showToast(`Copied ${num}`));
         resultsList.appendChild(li);
       });
@@ -128,8 +174,7 @@
 
     function copyAll() {
       if (extractedNumbers.length === 0) return showToast("Nothing to copy", "#dc3545");
-      navigator.clipboard.writeText(extractedNumbers.join("\n"))
-        .then(() => showToast("All numbers copied!"));
+      navigator.clipboard.writeText(extractedNumbers.join("\n")).then(() => showToast("All numbers copied!"));
     }
 
     function exportCSV() {
@@ -151,10 +196,58 @@
       displayResults(filtered);
     }
 
+    function sortNumbers() {
+      extractedNumbers.sort();
+      displayResults(extractedNumbers);
+    }
+
+    function uniqueNumbers() {
+      extractedNumbers = [...new Set(extractedNumbers)];
+      displayResults(extractedNumbers);
+    }
+
+    function reverseNumbers() {
+      extractedNumbers.reverse();
+      displayResults(extractedNumbers);
+    }
+
+    function clearAll() {
+      extractedNumbers = [];
+      inputText.value = "";
+      searchInput.value = "";
+      resultsList.innerHTML = "";
+      stats.textContent = "Found: 0";
+      showToast("Cleared all data");
+    }
+
+    function showStats() {
+      showToast(`Total: ${extractedNumbers.length}`);
+    }
+
+    function selectAllText() {
+      inputText.select();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("dark-theme");
+      localStorage.setItem("theme", document.body.classList.contains("dark-theme") ? "dark" : "light");
+    }
+
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark-theme");
+    }
+
     extractBtn.onclick = extractNumbers;
     copyBtn.onclick = copyAll;
     exportBtn.onclick = exportCSV;
     searchInput.oninput = filterResults;
+    sortBtn.onclick = sortNumbers;
+    uniqueBtn.onclick = uniqueNumbers;
+    reverseBtn.onclick = reverseNumbers;
+    clearBtn.onclick = clearAll;
+    statsBtn.onclick = showStats;
+    selectBtn.onclick = selectAllText;
+    themeBtn.onclick = toggleTheme;
 
     fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
