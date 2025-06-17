@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🌍 Global Phone Number Extractor</title>
-  <script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.10.48/bundle/libphonenumber-max.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.10.60/bundle/libphonenumber-max.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -73,25 +74,31 @@
   </div>
 
   <script>
-    const { findNumbers } = libphonenumber;
+    const { findPhoneNumbersInText } = libphonenumber;
 
     function extractPhoneNumbers() {
       const inputText = document.getElementById("inputText").value;
       const resultsList = document.getElementById("resultsList");
       resultsList.innerHTML = "";
 
-      const matches = findNumbers(inputText, null, { v2: true });
+      const matches = findPhoneNumbersInText(inputText);
 
       const seen = new Set();
-      matches.forEach(({ number }) => {
+      matches.forEach(({ number, country, ext, startsAt, endsAt }) => {
         const formatted = number.number;
         let display = formatted;
         if (seen.has(formatted)) {
           display += " (duplicate)";
         }
         seen.add(formatted);
+
+        const type = number.getType();
+        const typeLabel = type ? `(${type})` : '';
+        const countryLabel = country ? ` [${country}]` : '';
+        const extLabel = ext ? ` ext. ${ext}` : '';
+
         const li = document.createElement("li");
-        li.textContent = display;
+        li.textContent = `${display}${typeLabel}${countryLabel}${extLabel}`;
         resultsList.appendChild(li);
       });
 
