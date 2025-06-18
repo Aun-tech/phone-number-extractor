@@ -17,8 +17,6 @@
       --text-dark: #222;
       --highlight: #c9f2ff;
       --duplicate: #ffe0e0;
-      --duplicate-dark: #5e2e2e;
-      --danger: #dc3545;
     }
 
     body {
@@ -52,43 +50,8 @@
       margin-bottom: 1.5rem;
     }
 
-    .input-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .textarea-wrapper {
-      flex-grow: 1;
-      position: relative;
-    }
-
-    textarea {
-      width: 100%;
-      padding: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 1rem;
-      background-color: inherit;
-      color: inherit;
-      box-sizing: border-box;
-      resize: vertical;
-    }
-
-    .clear-btn {
-      background: var(--danger);
-      border: none;
-      color: #fff;
-      border-radius: 8px;
-      font-size: 1rem;
-      padding: 0.6rem 1rem;
-      cursor: pointer;
-      align-self: flex-start;
-    }
-    .clear-btn:hover { background: #c82333; }
-
-    input[type="file"], input[type="text"] {
-      width: 100%;
+    textarea, input[type="file"], input[type="text"] {
+      width: calc(100% - 42px);
       padding: 1rem;
       margin-bottom: 1rem;
       border: 1px solid #ccc;
@@ -96,7 +59,16 @@
       font-size: 1rem;
       background-color: inherit;
       color: inherit;
-      box-sizing: border-box;
+    }
+
+    .clear-btn {
+      vertical-align: middle;
+      background: none;
+      border: none;
+      color: red;
+      font-size: 1.2rem;
+      cursor: pointer;
+      margin-left: 4px;
     }
 
     button.btn {
@@ -105,10 +77,11 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      margin: 0.4rem 0.4rem 0.4rem 0;
+      margin: 0.4rem;
       transition: transform 0.2s ease;
     }
     button.btn:hover { transform: scale(1.05); }
+
     .btn-primary { background-color: var(--primary); color: #fff; }
     .btn-secondary { background-color: var(--accent); color: #fff; }
 
@@ -116,6 +89,7 @@
       position: relative;
       display: inline-block;
     }
+
     .dropdown-content {
       display: none;
       position: absolute;
@@ -126,6 +100,7 @@
       z-index: 1;
       min-width: 160px;
     }
+
     .dropdown-content button {
       display: block;
       width: 100%;
@@ -135,9 +110,11 @@
       text-align: left;
       cursor: pointer;
     }
+
     .dropdown-content button:hover {
       background-color: #f1f1f1;
     }
+
     .dropdown:hover .dropdown-content {
       display: block;
     }
@@ -150,6 +127,7 @@
       overflow-y: auto;
       font-family: monospace;
     }
+
     .dark-mode .results {
       background: #2c2c2c;
       color: #e6e6e6;
@@ -167,8 +145,9 @@
       background: var(--duplicate);
       font-weight: 600;
     }
+
     .dark-mode .results li.duplicate {
-      background: var(--duplicate-dark);
+      background: #4b2c2c;
     }
 
     .stats, .footer {
@@ -177,6 +156,7 @@
       font-size: 0.9rem;
       margin-top: 1rem;
     }
+
     .dark-mode .stats, .dark-mode .footer {
       color: #aaa;
     }
@@ -197,7 +177,6 @@
 
     @media (max-width: 600px) {
       .container { margin: 1rem; padding: 1rem; }
-      .input-group { flex-direction: column; }
     }
   </style>
 </head>
@@ -205,11 +184,9 @@
   <div class="container animate__animated animate__fadeIn">
     <h1>📞 SmartPak Number Extractor</h1>
     <input type="file" id="fileInput">
-    <div class="input-group">
-      <div class="textarea-wrapper">
-        <textarea id="inputText" placeholder="Paste text containing phone numbers..."></textarea>
-      </div>
-      <button class="clear-btn" id="clearBtn" title="Clear">🗑️ Clear</button>
+    <div style="display: flex; align-items: center;">
+      <textarea id="inputText" placeholder="Paste text containing phone numbers..."></textarea>
+      <button class="clear-btn" id="clearTextBtn">🗑️</button>
     </div>
     <div>
       <button class="btn btn-primary" id="extractBtn">Extract</button>
@@ -234,5 +211,116 @@
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const phoneRegex = /(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g;
+    const fileInput = document.getElementById("fileInput");
+    const inputText = document.getElementById("inputText");
+    const extractBtn = document.getElementById("extractBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const searchInput = document.getElementById("searchInput");
+    const resultsList = document.getElementById("resultsList");
+    const statsDisplay = document.getElementById("statsDisplay");
+    const themeToggle = document.getElementById("themeToggle");
+    const scrollTopBtn = document.getElementById("scrollTopBtn");
+    const clearTextBtn = document.getElementById("clearTextBtn");
+    let extractedNumbers = [];
+
+    const showToast = (msg, color = "#007bff") => {
+      Toastify({ text: msg, duration: 3000, close: true, gravity: "top", position: "right", backgroundColor: color }).showToast();
+    };
+
+    const displayResults = (numbers) => {
+      resultsList.innerHTML = "";
+      const countMap = {};
+      numbers.forEach(num => countMap[num] = (countMap[num] || 0) + 1);
+
+      const uniqueNumbers = [...new Set(numbers)];
+
+      uniqueNumbers.forEach(num => {
+        const li = document.createElement("li");
+        const count = countMap[num];
+        li.textContent = num;
+        if (count > 1) {
+          li.classList.add("duplicate");
+          const badge = document.createElement("span");
+          badge.textContent = `${count}x`;
+          badge.style.color = "#dc3545";
+          li.appendChild(badge);
+        }
+        li.onclick = () => navigator.clipboard.writeText(num).then(() => showToast(`📋 Copied ${num}`));
+        resultsList.appendChild(li);
+      });
+    };
+
+    const updateStats = () => statsDisplay.textContent = `${[...new Set(extractedNumbers)].length} unique / ${extractedNumbers.length} total number(s)`;
+
+    const extractNumbers = () => {
+      const matchesRaw = inputText.value.match(phoneRegex) || [];
+      const cleaned = matchesRaw.map(num => num.replace(/[- ]/g, ""));
+      extractedNumbers = cleaned;
+      displayResults(cleaned);
+      updateStats();
+      showToast("📞 Extraction complete");
+    };
+
+    const copyAll = () => {
+      const unique = [...new Set(extractedNumbers)];
+      if (!unique.length) return showToast("Nothing to copy", "#dc3545");
+      const formatted = unique.join("\n");
+      navigator.clipboard.writeText(formatted).then(() => showToast("📋 Copied all!"));
+    };
+
+    const exportData = (format) => {
+      const unique = [...new Set(extractedNumbers)];
+      if (!unique.length) return showToast("Nothing to export", "#dc3545");
+
+      const filename = `pakistani_numbers.${format}`;
+      if (format === "csv" || format === "txt") {
+        const blob = new Blob(["Phone Number\n" + unique.join("\n")], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+      } else if (format === "xlsx") {
+        const worksheet = XLSX.utils.aoa_to_sheet([["Phone Number"], ...unique.map(num => [num])]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Numbers");
+        XLSX.writeFile(workbook, filename);
+      } else if (format === "pdf") {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        unique.forEach((num, i) => doc.text(num, 10, 10 + i * 10));
+        doc.save(filename);
+      }
+      showToast(`⬇️ Downloaded ${format.toUpperCase()}`);
+    };
+
+    const filterResults = () => {
+      const q = searchInput.value.toLowerCase();
+      displayResults(extractedNumbers.filter(num => num.includes(q)));
+    };
+
+    const toggleTheme = () => {
+      document.body.classList.toggle("dark-mode");
+      localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+    };
+
+    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
+
+    extractBtn.onclick = extractNumbers;
+    copyBtn.onclick = copyAll;
+    searchInput.oninput = filterResults;
+    themeToggle.onclick = toggleTheme;
+    scrollTopBtn.onclick = scrollToTop;
+    clearTextBtn.onclick = () => inputText.value = "";
+
+    fileInput.onchange = e => {
+      const reader = new FileReader();
+      reader.onload = () => inputText.value = reader.result;
+      reader.readAsText(e.target.files[0]);
+    };
+  </script>
 </body>
 </html>
