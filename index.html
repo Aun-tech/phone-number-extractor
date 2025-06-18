@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,6 +15,8 @@
       --bg-dark: #111;
       --text-light: #fff;
       --text-dark: #222;
+      --highlight: #c9f2ff;
+      --duplicate: #ffe0e0;
     }
 
     body {
@@ -56,6 +57,8 @@
       border: 1px solid #ccc;
       border-radius: 10px;
       font-size: 1rem;
+      background-color: inherit;
+      color: inherit;
     }
 
     button.btn {
@@ -81,12 +84,26 @@
       font-family: monospace;
     }
 
-    .dark-mode .results { background: #2c2c2c; }
+    .dark-mode .results {
+      background: #2c2c2c;
+      color: #e6e6e6;
+    }
 
     .results li {
       padding: 0.5rem;
       border-bottom: 1px solid #ddd;
       cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .results li.duplicate {
+      background: var(--duplicate);
+      font-weight: 600;
+    }
+
+    .dark-mode .results li.duplicate {
+      background: #4b2c2c;
     }
 
     .stats, .footer {
@@ -94,6 +111,10 @@
       color: #888;
       font-size: 0.9rem;
       margin-top: 1rem;
+    }
+
+    .dark-mode .stats, .dark-mode .footer {
+      color: #aaa;
     }
 
     .floating-btn {
@@ -153,33 +174,49 @@
 
     const displayResults = (numbers) => {
       resultsList.innerHTML = "";
-      numbers.forEach(num => {
+      const countMap = {};
+      numbers.forEach(num => countMap[num] = (countMap[num] || 0) + 1);
+
+      const uniqueNumbers = [...new Set(numbers)];
+
+      uniqueNumbers.forEach(num => {
         const li = document.createElement("li");
+        const count = countMap[num];
         li.textContent = num;
+        if (count > 1) {
+          li.classList.add("duplicate");
+          const badge = document.createElement("span");
+          badge.textContent = `${count}x`;
+          badge.style.color = "#dc3545";
+          li.appendChild(badge);
+        }
         li.onclick = () => navigator.clipboard.writeText(num).then(() => showToast(`📋 Copied ${num}`));
         resultsList.appendChild(li);
       });
     };
 
-    const updateStats = () => statsDisplay.textContent = `${extractedNumbers.length} number(s) found`;
+    const updateStats = () => statsDisplay.textContent = `${[...new Set(extractedNumbers)].length} unique / ${extractedNumbers.length} total number(s)`;
 
     const extractNumbers = () => {
-      const matches = [...new Set((inputText.value.match(phoneRegex) || []).map(num => num.replace(/[- ]/g, "")))];
-      extractedNumbers = matches;
-      displayResults(matches);
+      const matchesRaw = inputText.value.match(phoneRegex) || [];
+      const cleaned = matchesRaw.map(num => num.replace(/[- ]/g, ""));
+      extractedNumbers = cleaned;
+      displayResults(cleaned);
       updateStats();
       showToast("📞 Extraction complete");
     };
 
     const copyAll = () => {
-      if (!extractedNumbers.length) return showToast("Nothing to copy", "#dc3545");
-      navigator.clipboard.writeText(extractedNumbers.join("\n"))
-        .then(() => showToast("📋 Copied all!"));
+      const unique = [...new Set(extractedNumbers)];
+      if (!unique.length) return showToast("Nothing to copy", "#dc3545");
+      const formatted = unique.map(num => `${num} (${extractedNumbers.filter(n => n === num).length}x)`).join("\n");
+      navigator.clipboard.writeText(formatted).then(() => showToast("📋 Copied all!"));
     };
 
     const exportCSV = () => {
-      if (!extractedNumbers.length) return showToast("Nothing to export", "#dc3545");
-      const blob = new Blob(["Phone Number\n" + extractedNumbers.join("\n")], { type: "text/csv" });
+      const unique = [...new Set(extractedNumbers)];
+      if (!unique.length) return showToast("Nothing to export", "#dc3545");
+      const blob = new Blob(["Phone Number\n" + unique.join("\n")], { type: "text/csv" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "pakistani_numbers.csv";
