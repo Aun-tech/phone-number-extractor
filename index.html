@@ -75,6 +75,40 @@
     .btn-primary { background-color: var(--primary); color: #fff; }
     .btn-secondary { background-color: var(--accent); color: #fff; }
 
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+      border-radius: 8px;
+      overflow: hidden;
+      z-index: 1;
+      min-width: 160px;
+    }
+
+    .dropdown-content button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .dropdown-content button:hover {
+      background-color: #f1f1f1;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
     .results {
       background: #f1f3f5;
       padding: 1rem;
@@ -144,7 +178,15 @@
     <div>
       <button class="btn btn-primary" id="extractBtn">Extract</button>
       <button class="btn btn-secondary" id="copyBtn">📋 Copy</button>
-      <button class="btn btn-primary" id="exportBtn">⬇️ Export CSV</button>
+      <div class="dropdown">
+        <button class="btn btn-primary" id="exportBtn">📦 Export</button>
+        <div class="dropdown-content">
+          <button onclick="exportData('csv')">Export as CSV (.csv)</button>
+          <button onclick="exportData('xlsx')">Export as Excel (.xlsx)</button>
+          <button onclick="exportData('pdf')">Export as PDF (.pdf)</button>
+          <button onclick="exportData('txt')">Export as TXT (.txt)</button>
+        </div>
+      </div>
       <button class="btn btn-secondary" id="themeToggle">🌚 Toggle Theme</button>
     </div>
     <input type="text" id="searchInput" placeholder="🔍 Filter results">
@@ -154,13 +196,14 @@
   </div>
   <button class="floating-btn" id="scrollTopBtn">⬆️</button>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     const phoneRegex = /(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g;
     const fileInput = document.getElementById("fileInput");
     const inputText = document.getElementById("inputText");
     const extractBtn = document.getElementById("extractBtn");
     const copyBtn = document.getElementById("copyBtn");
-    const exportBtn = document.getElementById("exportBtn");
     const searchInput = document.getElementById("searchInput");
     const resultsList = document.getElementById("resultsList");
     const statsDisplay = document.getElementById("statsDisplay");
@@ -213,15 +256,29 @@
       navigator.clipboard.writeText(formatted).then(() => showToast("📋 Copied all!"));
     };
 
-    const exportCSV = () => {
+    const exportData = (format) => {
       const unique = [...new Set(extractedNumbers)];
       if (!unique.length) return showToast("Nothing to export", "#dc3545");
-      const blob = new Blob(["Phone Number\n" + unique.join("\n")], { type: "text/csv" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "pakistani_numbers.csv";
-      link.click();
-      showToast("⬇️ Downloaded CSV");
+
+      const filename = `pakistani_numbers.${format}`;
+      if (format === "csv" || format === "txt") {
+        const blob = new Blob(["Phone Number\n" + unique.join("\n")], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+      } else if (format === "xlsx") {
+        const worksheet = XLSX.utils.aoa_to_sheet([["Phone Number"], ...unique.map(num => [num])]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Numbers");
+        XLSX.writeFile(workbook, filename);
+      } else if (format === "pdf") {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        unique.forEach((num, i) => doc.text(num, 10, 10 + i * 10));
+        doc.save(filename);
+      }
+      showToast(`⬇️ Downloaded ${format.toUpperCase()}`);
     };
 
     const filterResults = () => {
@@ -240,7 +297,6 @@
 
     extractBtn.onclick = extractNumbers;
     copyBtn.onclick = copyAll;
-    exportBtn.onclick = exportCSV;
     searchInput.oninput = filterResults;
     themeToggle.onclick = toggleTheme;
     scrollTopBtn.onclick = scrollToTop;
