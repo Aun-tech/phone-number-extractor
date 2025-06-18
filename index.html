@@ -209,7 +209,7 @@
     const copyAll = () => {
       const unique = [...new Set(extractedNumbers)];
       if (!unique.length) return showToast("Nothing to copy", "#dc3545");
-      const formatted = unique.map(num => `${num} (${extractedNumbers.filter(n => n === num).length}x)`).join("\n");
+      const formatted = unique.join("\n");
       navigator.clipboard.writeText(formatted).then(() => showToast("📋 Copied all!"));
     };
 
