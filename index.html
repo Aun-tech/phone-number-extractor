@@ -17,6 +17,7 @@
       --text-dark: #222;
       --highlight: #c9f2ff;
       --duplicate: #ffe0e0;
+      --danger: #dc3545;
     }
 
     body {
@@ -50,6 +51,10 @@
       margin-bottom: 1.5rem;
     }
 
+    .input-wrapper {
+      position: relative;
+    }
+
     textarea, input[type="file"], input[type="text"] {
       width: 100%;
       padding: 1rem;
@@ -59,6 +64,22 @@
       font-size: 1rem;
       background-color: inherit;
       color: inherit;
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0;
+    }
+
+    .clear-btn:hover {
+      transform: scale(1.1);
     }
 
     button.btn {
@@ -174,7 +195,10 @@
   <div class="container animate__animated animate__fadeIn">
     <h1>📞 SmartPak Number Extractor</h1>
     <input type="file" id="fileInput">
-    <textarea id="inputText" placeholder="Paste text containing phone numbers..."></textarea>
+    <div class="input-wrapper">
+      <textarea id="inputText" placeholder="Paste text containing phone numbers..."></textarea>
+      <button class="clear-btn" id="clearBtn" title="Clear">🗑️</button>
+    </div>
     <div>
       <button class="btn btn-primary" id="extractBtn">Extract</button>
       <button class="btn btn-secondary" id="copyBtn">📋 Copy</button>
@@ -209,6 +233,7 @@
     const statsDisplay = document.getElementById("statsDisplay");
     const themeToggle = document.getElementById("themeToggle");
     const scrollTopBtn = document.getElementById("scrollTopBtn");
+    const clearBtn = document.getElementById("clearBtn");
     let extractedNumbers = [];
 
     const showToast = (msg, color = "#007bff") => {
@@ -293,6 +318,8 @@
 
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    const clearText = () => inputText.value = "";
+
     if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
 
     extractBtn.onclick = extractNumbers;
@@ -300,6 +327,7 @@
     searchInput.oninput = filterResults;
     themeToggle.onclick = toggleTheme;
     scrollTopBtn.onclick = scrollToTop;
+    clearBtn.onclick = clearText;
 
     fileInput.onchange = e => {
       const reader = new FileReader();
