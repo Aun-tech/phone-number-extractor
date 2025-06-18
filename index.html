@@ -17,6 +17,7 @@
       --text-dark: #222;
       --highlight: #c9f2ff;
       --duplicate: #ffe0e0;
+      --duplicate-dark: #5e2e2e;
       --danger: #dc3545;
     }
 
@@ -53,16 +54,8 @@
 
     .input-group {
       display: flex;
-      flex-direction: column;
-      position: relative;
+      flex-wrap: wrap;
       gap: 0.5rem;
-    }
-
-    @media (min-width: 600px) {
-      .input-group {
-        flex-direction: row;
-        align-items: flex-start;
-      }
     }
 
     .textarea-wrapper {
@@ -79,10 +72,10 @@
       background-color: inherit;
       color: inherit;
       box-sizing: border-box;
+      resize: vertical;
     }
 
     .clear-btn {
-      align-self: flex-start;
       background: var(--danger);
       border: none;
       color: #fff;
@@ -90,12 +83,9 @@
       font-size: 1rem;
       padding: 0.6rem 1rem;
       cursor: pointer;
-      transition: background 0.3s ease;
+      align-self: flex-start;
     }
-
-    .clear-btn:hover {
-      background: #c82333;
-    }
+    .clear-btn:hover { background: #c82333; }
 
     input[type="file"], input[type="text"] {
       width: 100%;
@@ -106,6 +96,7 @@
       font-size: 1rem;
       background-color: inherit;
       color: inherit;
+      box-sizing: border-box;
     }
 
     button.btn {
@@ -118,7 +109,6 @@
       transition: transform 0.2s ease;
     }
     button.btn:hover { transform: scale(1.05); }
-
     .btn-primary { background-color: var(--primary); color: #fff; }
     .btn-secondary { background-color: var(--accent); color: #fff; }
 
@@ -126,7 +116,6 @@
       position: relative;
       display: inline-block;
     }
-
     .dropdown-content {
       display: none;
       position: absolute;
@@ -137,7 +126,6 @@
       z-index: 1;
       min-width: 160px;
     }
-
     .dropdown-content button {
       display: block;
       width: 100%;
@@ -147,11 +135,9 @@
       text-align: left;
       cursor: pointer;
     }
-
     .dropdown-content button:hover {
       background-color: #f1f1f1;
     }
-
     .dropdown:hover .dropdown-content {
       display: block;
     }
@@ -164,7 +150,6 @@
       overflow-y: auto;
       font-family: monospace;
     }
-
     .dark-mode .results {
       background: #2c2c2c;
       color: #e6e6e6;
@@ -182,9 +167,8 @@
       background: var(--duplicate);
       font-weight: 600;
     }
-
     .dark-mode .results li.duplicate {
-      background: #4b2c2c;
+      background: var(--duplicate-dark);
     }
 
     .stats, .footer {
@@ -193,7 +177,6 @@
       font-size: 0.9rem;
       margin-top: 1rem;
     }
-
     .dark-mode .stats, .dark-mode .footer {
       color: #aaa;
     }
@@ -214,6 +197,7 @@
 
     @media (max-width: 600px) {
       .container { margin: 1rem; padding: 1rem; }
+      .input-group { flex-direction: column; }
     }
   </style>
 </head>
@@ -233,9 +217,9 @@
       <div class="dropdown">
         <button class="btn btn-primary" id="exportBtn">📦 Export</button>
         <div class="dropdown-content">
-          <button onclick="exportData('csv')">Export as CSV (.csv)</button>
           <button onclick="exportData('xlsx')">Export as Excel (.xlsx)</button>
           <button onclick="exportData('pdf')">Export as PDF (.pdf)</button>
+          <button onclick="exportData('csv')">Export as CSV (.csv)</button>
           <button onclick="exportData('txt')">Export as TXT (.txt)</button>
         </div>
       </div>
