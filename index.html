@@ -303,7 +303,20 @@
 
   if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
 
-  extractBtn.onclick = extractNumbers;
+  extractBtn.onclick = () => {
+  const rawMatches = inputText.value.match(/\b(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g) || [];
+  const cleaned = rawMatches.map(num => num.replace(/[- ]/g, '').replace(/^(\+92|0092)/, '0'));
+
+  extractedNumbers = cleaned.map(number => {
+    const valid = /^03\d{9}$/.test(number);  // Valid if starts with 03 and has 11 digits
+    return { number, valid };
+  });
+
+  displayResults(extractedNumbers);
+  updateStats();
+  showToast("📞 Extracted with basic validation");
+};
+
   copyBtn.onclick = copyAll;
   searchInput.oninput = filterResults;
   themeToggle.onclick = toggleTheme;
