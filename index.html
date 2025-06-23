@@ -215,46 +215,69 @@
     Toastify({ text: msg, duration: 3000, close: true, gravity: "top", position: "right", backgroundColor: color }).showToast();
   };
 
-  const displayResults = (numbers) => {
-    resultsList.innerHTML = "";
-    const countMap = {};
-    numbers.forEach(num => countMap[num] = (countMap[num] || 0) + 1);
+ const displayResults = (numbers) => {
+  resultsList.innerHTML = "";
+  const countMap = {};
+  numbers.forEach(({ number }) => countMap[number] = (countMap[number] || 0) + 1);
 
-    const filtered = showingDuplicatesOnly
-      ? numbers.filter(num => countMap[num] > 1)
-      : [...new Set(numbers)];
+  const filtered = showingDuplicatesOnly
+    ? numbers.filter(({ number }) => countMap[number] > 1)
+    : numbers;
 
-    const seen = new Set();
+  const seen = new Set();
 
-    filtered.forEach(num => {
-      if (showingDuplicatesOnly && seen.has(num)) return;
-      seen.add(num);
-      const li = document.createElement("li");
-      const count = countMap[num];
-      li.textContent = num;
-      if (count > 1) {
-        li.classList.add("duplicate");
-        const badge = document.createElement("span");
-        badge.textContent = `${count}x`;
-        badge.style.color = "#dc3545";
-        li.appendChild(badge);
-      }
-      li.onclick = () => navigator.clipboard.writeText(num).then(() => showToast(`📋 Copied ${num}`));
-      resultsList.appendChild(li);
-    });
-  };
+  filtered.forEach(entry => {
+    if (showingDuplicatesOnly && seen.has(entry.number)) return;
+    seen.add(entry.number);
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>${entry.number}</strong><br>
+      <small>
+        ${entry.valid ? "✅ Valid" : "❌ Invalid"} |
+        ${entry.type || "Unknown Type"} |
+        ${entry.carrier || "Unknown Carrier"}
+      </small>
+    `;
+
+    if (!entry.valid) li.style.color = "red";
+
+    if (countMap[entry.number] > 1) {
+      li.classList.add("duplicate");
+      const badge = document.createElement("span");
+      badge.textContent = `${countMap[entry.number]}x`;
+      badge.style.color = "#dc3545";
+      li.appendChild(badge);
+    }
+
+    li.onclick = () =>
+      navigator.clipboard.writeText(entry.number)
+        .then(() => showToast(`📋 Copied ${entry.number}`));
+
+    resultsList.appendChild(li);
+  });
+};
 
   const updateStats = () => {
     statsDisplay.textContent = `${[...new Set(extractedNumbers)].length} unique / ${extractedNumbers.length} total number(s)`;
   };
 
   const extractNumbers = () => {
-    const matchesRaw = inputText.value.match(phoneRegex) || [];
-    const cleaned = matchesRaw.map(num => num.replace(/[- ]/g, ""));
-    extractedNumbers = cleaned;
-    displayResults(cleaned);
-    updateStats();
-    showToast("📞 Extraction complete");
+  const phoneRegex = /(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g;
+  const matchesRaw = inputText.value.match(phoneRegex) || [];
+  const cleaned = matchesRaw.map(num => num.replace(/[- ]/g, ""));
+
+  // Wrap into object format to match AI structure
+  extractedNumbers = cleaned.map(num => ({
+    number: num,
+    valid: true,
+    type: "Pakistani Mobile",
+    carrier: "Unknown"
+  }));
+
+  displayResults(extractedNumbers);
+  updateStats();
+  showToast("📞 Extraction complete");
   };
 
   const copyAll = () => {
