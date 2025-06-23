@@ -321,48 +321,6 @@
       reader.onload = () => inputText.value = reader.result;
       reader.readAsText(e.target.files[0]);
     };
-
-    <!-- Add this button next to your existing buttons -->
-<button class="btn btn-secondary" id="filterDuplicatesBtn">🔁 Show Duplicates</button>
-
-<script>
-  // Declare variables with proper initialization
-  let showingDuplicates = false;
-  const filterDuplicatesBtn = document.getElementById("filterDuplicatesBtn");
-  const statsDisplay = document.getElementById("statsDisplay");
-
-  // Wait until DOM is fully ready and extractedNumbers is defined in the main script
-  window.addEventListener("DOMContentLoaded", () => {
-    if (typeof extractedNumbers === "undefined") {
-      window.extractedNumbers = [];
-    }
-
-    const displayDuplicatesOnly = () => {
-      const countMap = {};
-      extractedNumbers.forEach(num => countMap[num] = (countMap[num] || 0) + 1);
-      const duplicates = extractedNumbers.filter(num => countMap[num] > 1);
-      displayResults(duplicates);
-      statsDisplay.textContent = `${[...new Set(duplicates)].length} duplicate(s) found`;
-    };
-
-    filterDuplicatesBtn.onclick = () => {
-      if (!Array.isArray(extractedNumbers) || extractedNumbers.length === 0) {
-        showToast("No numbers extracted yet", "#dc3545");
-        return;
-      }
-      showingDuplicates = !showingDuplicates;
-      if (showingDuplicates) {
-        displayDuplicatesOnly();
-        filterDuplicatesBtn.textContent = "🔁 Show All";
-      } else {
-        displayResults(extractedNumbers);
-        updateStats();
-        filterDuplicatesBtn.textContent = "🔁 Show Duplicates";
-      }
-    };
-  });
-</script>
-
   </script>
 </body>
 </html>
