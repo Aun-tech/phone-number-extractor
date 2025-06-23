@@ -348,17 +348,59 @@
     const aiExtractBtn = document.getElementById("aiExtractBtn");
 
 aiExtractBtn.onclick = async () => {
-  const input = inputText.value.trim();
-  if (!input) return showToast("Please enter some text", "#dc3545");
-
-  showToast("🔍 AI analyzing numbers...");
+  const text = inputText.value;
+  if (!text.trim()) return showToast("⚠️ Please enter text first", "#dc3545");
 
   try {
     const res = await fetch("http://127.0.0.1:5000/ai-extract", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: input })
+      body: JSON.stringify({ text })
     });
+
+    const data = await res.json();
+    if (!data.numbers || data.numbers.length === 0) {
+      showToast("❌ No numbers found by AI");
+      return;
+    }
+
+    // Store valid numbers only for copy/export
+    extractedNumbers = data.numbers
+      .filter(entry => entry.valid)
+      .map(entry => entry.number);
+
+    // Show all numbers (valid + invalid) in the list
+    resultsList.innerHTML = "";
+    data.numbers.forEach(entry => {
+      const li = document.createElement("li");
+
+      li.innerHTML = `
+        <strong>${entry.number}</strong><br>
+        <small>
+          ${entry.valid ? "✅ Valid" : "❌ Invalid"} |
+          ${entry.type || "Unknown Type"} |
+          ${entry.carrier || "Unknown Carrier"}
+        </small>
+      `;
+
+      if (!entry.valid) li.style.color = "red";
+
+      li.onclick = () =>
+        navigator.clipboard.writeText(entry.number).then(() =>
+          showToast(`📋 Copied ${entry.number}`)
+        );
+
+      resultsList.appendChild(li);
+    });
+
+    updateStats();
+    showToast("🤖 AI Extraction Complete", "#28a745");
+  } catch (err) {
+    console.error(err);
+    showToast("⚠️ AI Extraction Failed", "#dc3545");
+  }
+};
+
 
     const data = await res.json();
     if (data.error || !data.numbers) throw new Error(data.error || "AI extraction failed");
