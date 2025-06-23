@@ -194,251 +194,187 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-    const phoneRegex = /(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g;
-    const fileInput = document.getElementById("fileInput");
-    const inputText = document.getElementById("inputText");
-    const extractBtn = document.getElementById("extractBtn");
-    const copyBtn = document.getElementById("copyBtn");
-    const searchInput = document.getElementById("searchInput");
-    const resultsList = document.getElementById("resultsList");
-    const statsDisplay = document.getElementById("statsDisplay");
-    const themeToggle = document.getElementById("themeToggle");
-    const scrollTopBtn = document.getElementById("scrollTopBtn");
-    const clearTextBtn = document.getElementById("clearTextBtn");
-    const showDuplicatesBtn = document.getElementById("showDuplicatesBtn");
+   <script>
+  const phoneRegex = /(?:\+92|0092|0)?3\d{2}[- ]?\d{7}\b/g;
+  const fileInput = document.getElementById("fileInput");
+  const inputText = document.getElementById("inputText");
+  const extractBtn = document.getElementById("extractBtn");
+  const copyBtn = document.getElementById("copyBtn");
+  const searchInput = document.getElementById("searchInput");
+  const resultsList = document.getElementById("resultsList");
+  const statsDisplay = document.getElementById("statsDisplay");
+  const themeToggle = document.getElementById("themeToggle");
+  const scrollTopBtn = document.getElementById("scrollTopBtn");
+  const clearTextBtn = document.getElementById("clearTextBtn");
+  const showDuplicatesBtn = document.getElementById("showDuplicatesBtn");
+  const aiExtractBtn = document.querySelectorAll("#aiExtractBtn")[0]; // Use only one
 
-    let extractedNumbers = [];
-    let showingDuplicatesOnly = false;
+  let extractedNumbers = [];
+  let showingDuplicatesOnly = false;
 
-    const showToast = (msg, color = "#007bff") => {
-      Toastify({ text: msg, duration: 3000, close: true, gravity: "top", position: "right", backgroundColor: color }).showToast();
-    };
+  const showToast = (msg, color = "#007bff") => {
+    Toastify({ text: msg, duration: 3000, close: true, gravity: "top", position: "right", backgroundColor: color }).showToast();
+  };
 
-    const displayResults = (numbers) => {
-      resultsList.innerHTML = "";
-      const countMap = {};
-      numbers.forEach(num => countMap[num] = (countMap[num] || 0) + 1);
+  const displayResults = (numbers) => {
+    resultsList.innerHTML = "";
+    const countMap = {};
+    numbers.forEach(num => countMap[num] = (countMap[num] || 0) + 1);
 
-      const filtered = showingDuplicatesOnly
-        ? numbers.filter(num => countMap[num] > 1)
-        : [...new Set(numbers)];
+    const filtered = showingDuplicatesOnly
+      ? numbers.filter(num => countMap[num] > 1)
+      : [...new Set(numbers)];
 
-      const seen = new Set();
+    const seen = new Set();
 
-      filtered.forEach(num => {
-        if (showingDuplicatesOnly && seen.has(num)) return;
-        seen.add(num);
-        const li = document.createElement("li");
-        const count = countMap[num];
-        li.textContent = num;
-        if (count > 1) {
-          li.classList.add("duplicate");
-          const badge = document.createElement("span");
-          badge.textContent = `${count}x`;
-          badge.style.color = "#dc3545";
-          li.appendChild(badge);
-        }
-        li.onclick = () => navigator.clipboard.writeText(num).then(() => showToast(`📋 Copied ${num}`));
-        resultsList.appendChild(li);
-      });
-    };
-
-    const updateStats = () => statsDisplay.textContent = `${[...new Set(extractedNumbers)].length} unique / ${extractedNumbers.length} total number(s)`;
-
-    const extractNumbers = () => {
-      const matchesRaw = inputText.value.match(phoneRegex) || [];
-      const cleaned = matchesRaw.map(num => num.replace(/[- ]/g, ""));
-      extractedNumbers = cleaned;
-      displayResults(cleaned);
-      updateStats();
-      showToast("📞 Extraction complete");
-    };
-
-    const copyAll = () => {
-      const unique = [...new Set(extractedNumbers)];
-      if (!unique.length) return showToast("Nothing to copy", "#dc3545");
-      const formatted = unique.join("\n");
-      navigator.clipboard.writeText(formatted).then(() => showToast("📋 Copied all!"));
-    };
-
-    const exportData = (format) => {
-      const unique = [...new Set(extractedNumbers)];
-      if (!unique.length) return showToast("Nothing to export", "#dc3545");
-
-      const filename = `pakistani_numbers.${format}`;
-      if (format === "csv" || format === "txt") {
-        const blob = new Blob(["Phone Number\n" + unique.join("\n")], { type: "text/plain" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-      } else if (format === "xlsx") {
-        const worksheet = XLSX.utils.aoa_to_sheet([["Phone Number"], ...unique.map(num => [num])]);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Numbers");
-        XLSX.writeFile(workbook, filename);
-      } else if (format === "pdf") {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        unique.forEach((num, i) => doc.text(num, 10, 10 + i * 10));
-        doc.save(filename);
+    filtered.forEach(num => {
+      if (showingDuplicatesOnly && seen.has(num)) return;
+      seen.add(num);
+      const li = document.createElement("li");
+      const count = countMap[num];
+      li.textContent = num;
+      if (count > 1) {
+        li.classList.add("duplicate");
+        const badge = document.createElement("span");
+        badge.textContent = `${count}x`;
+        badge.style.color = "#dc3545";
+        li.appendChild(badge);
       }
-      showToast(`⬇️ Downloaded ${format.toUpperCase()}`);
-    };
+      li.onclick = () => navigator.clipboard.writeText(num).then(() => showToast(`📋 Copied ${num}`));
+      resultsList.appendChild(li);
+    });
+  };
 
-    const filterResults = () => {
-      const q = searchInput.value.toLowerCase();
-      displayResults(extractedNumbers.filter(num => num.includes(q)));
-    };
+  const updateStats = () => {
+    statsDisplay.textContent = `${[...new Set(extractedNumbers)].length} unique / ${extractedNumbers.length} total number(s)`;
+  };
 
-    const toggleTheme = () => {
-      document.body.classList.toggle("dark-mode");
-      localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
-    };
+  const extractNumbers = () => {
+    const matchesRaw = inputText.value.match(phoneRegex) || [];
+    const cleaned = matchesRaw.map(num => num.replace(/[- ]/g, ""));
+    extractedNumbers = cleaned;
+    displayResults(cleaned);
+    updateStats();
+    showToast("📞 Extraction complete");
+  };
 
-    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const copyAll = () => {
+    const unique = [...new Set(extractedNumbers)];
+    if (!unique.length) return showToast("Nothing to copy", "#dc3545");
+    const formatted = unique.join("\n");
+    navigator.clipboard.writeText(formatted).then(() => showToast("📋 Copied all!"));
+  };
 
-    if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
+  const exportData = (format) => {
+    const unique = [...new Set(extractedNumbers)];
+    if (!unique.length) return showToast("Nothing to export", "#dc3545");
 
-    extractBtn.onclick = extractNumbers;
-    copyBtn.onclick = copyAll;
-    searchInput.oninput = filterResults;
-    themeToggle.onclick = toggleTheme;
-    scrollTopBtn.onclick = scrollToTop;
-    clearTextBtn.onclick = () => inputText.value = "";
-    fileInput.onchange = e => {
-      const reader = new FileReader();
-      reader.onload = () => inputText.value = reader.result;
-      reader.readAsText(e.target.files[0]);
-    };
+    const filename = `pakistani_numbers.${format}`;
+    if (format === "csv" || format === "txt") {
+      const blob = new Blob(["Phone Number\n" + unique.join("\n")], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    } else if (format === "xlsx") {
+      const worksheet = XLSX.utils.aoa_to_sheet([["Phone Number"], ...unique.map(num => [num])]);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Numbers");
+      XLSX.writeFile(workbook, filename);
+    } else if (format === "pdf") {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      unique.forEach((num, i) => doc.text(num, 10, 10 + i * 10));
+      doc.save(filename);
+    }
+    showToast(`⬇️ Downloaded ${format.toUpperCase()}`);
+  };
 
-    // New: Duplicates filter toggle
-    showDuplicatesBtn.onclick = () => {
-      showingDuplicatesOnly = !showingDuplicatesOnly;
-      displayResults(extractedNumbers);
-      showToast(showingDuplicatesOnly ? "🔁 Showing duplicates only" : "📄 Showing all numbers");
-    };
-      document.getElementById("aiExtractBtn").onclick = async () => {
-    const text = document.getElementById("inputText").value;
-    if (!text.trim()) return Toastify({ text: "❌ Please paste some text first", duration: 3000, backgroundColor: "#dc3545" }).showToast();
+  const filterResults = () => {
+    const q = searchInput.value.toLowerCase();
+    displayResults(extractedNumbers.filter(num => num.includes(q)));
+  };
 
-    Toastify({ text: "🧠 AI processing started...", duration: 3000, backgroundColor: "#28a745" }).showToast();
+  const toggleTheme = () => {
+    document.body.classList.toggle("dark-mode");
+    localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+  };
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
+
+  extractBtn.onclick = extractNumbers;
+  copyBtn.onclick = copyAll;
+  searchInput.oninput = filterResults;
+  themeToggle.onclick = toggleTheme;
+  scrollTopBtn.onclick = scrollToTop;
+  clearTextBtn.onclick = () => inputText.value = "";
+  fileInput.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = () => inputText.value = reader.result;
+    reader.readAsText(e.target.files[0]);
+  };
+
+  showDuplicatesBtn.onclick = () => {
+    showingDuplicatesOnly = !showingDuplicatesOnly;
+    displayResults(extractedNumbers);
+    showToast(showingDuplicatesOnly ? "🔁 Showing duplicates only" : "📄 Showing all numbers");
+  };
+
+  aiExtractBtn.onclick = async () => {
+    const text = inputText.value.trim();
+    if (!text) return showToast("⚠️ Please enter text first", "#dc3545");
+
+    showToast("🧠 AI processing started...", "#28a745");
 
     try {
-      const response = await fetch("http://localhost:5000/ai-extract", {
+      const res = await fetch("http://localhost:5000/ai-extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text })
       });
 
-      const data = await response.json();
-      if (data.numbers && data.numbers.length > 0) {
-        extractedNumbers = data.numbers;
-        displayResults(extractedNumbers);
-        updateStats();
-        Toastify({ text: `✅ ${data.numbers.length} numbers found`, duration: 3000, backgroundColor: "#28a745" }).showToast();
-      } else {
-        Toastify({ text: "⚠️ No valid numbers found", duration: 3000, backgroundColor: "#ffc107" }).showToast();
+      const data = await res.json();
+
+      if (!data.numbers || data.numbers.length === 0) {
+        return showToast("❌ No numbers found by AI", "#ffc107");
       }
-    } catch (error) {
-      console.error("AI Error:", error);
-      Toastify({ text: "❌ AI extraction failed", duration: 3000, backgroundColor: "#dc3545" }).showToast();
+
+      extractedNumbers = data.numbers
+        .filter(entry => entry.valid)
+        .map(entry => entry.number);
+
+      resultsList.innerHTML = "";
+      data.numbers.forEach(entry => {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+          <strong>${entry.number}</strong><br>
+          <small>
+            ${entry.valid ? "✅ Valid" : "❌ Invalid"} |
+            ${entry.type || "Unknown Type"} |
+            ${entry.carrier || "Unknown Carrier"}
+          </small>
+        `;
+
+        if (!entry.valid) li.style.color = "red";
+
+        li.onclick = () =>
+          navigator.clipboard.writeText(entry.number).then(() =>
+            showToast(`📋 Copied ${entry.number}`)
+          );
+
+        resultsList.appendChild(li);
+      });
+
+      updateStats();
+      showToast("🤖 AI Extraction Complete", "#28a745");
+    } catch (err) {
+      console.error(err);
+      showToast("⚠️ AI Extraction Failed", "#dc3545");
     }
   };
-    const aiExtractBtn = document.getElementById("aiExtractBtn");
-
-aiExtractBtn.onclick = async () => {
-  const text = inputText.value;
-  if (!text.trim()) return showToast("⚠️ Please enter text first", "#dc3545");
-
-  try {
-    const res = await fetch("http://127.0.0.1:5000/ai-extract", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
-    });
-
-    const data = await res.json();
-    if (!data.numbers || data.numbers.length === 0) {
-      showToast("❌ No numbers found by AI");
-      return;
-    }
-
-    // Store valid numbers only for copy/export
-    extractedNumbers = data.numbers
-      .filter(entry => entry.valid)
-      .map(entry => entry.number);
-
-    // Show all numbers (valid + invalid) in the list
-    resultsList.innerHTML = "";
-    data.numbers.forEach(entry => {
-      const li = document.createElement("li");
-
-      li.innerHTML = `
-        <strong>${entry.number}</strong><br>
-        <small>
-          ${entry.valid ? "✅ Valid" : "❌ Invalid"} |
-          ${entry.type || "Unknown Type"} |
-          ${entry.carrier || "Unknown Carrier"}
-        </small>
-      `;
-
-      if (!entry.valid) li.style.color = "red";
-
-      li.onclick = () =>
-        navigator.clipboard.writeText(entry.number).then(() =>
-          showToast(`📋 Copied ${entry.number}`)
-        );
-
-      resultsList.appendChild(li);
-    });
-
-    updateStats();
-    showToast("🤖 AI Extraction Complete", "#28a745");
-  } catch (err) {
-    console.error(err);
-    showToast("⚠️ AI Extraction Failed", "#dc3545");
-  }
-};
-
-
-    const data = await res.json();
-    if (data.error || !data.numbers) throw new Error(data.error || "AI extraction failed");
-
-    extractedNumbers = data.numbers.map(n => n.number);
-
-    resultsList.innerHTML = "";
-   data.numbers.forEach(entry => {
-  const li = document.createElement("li");
-
-  li.innerHTML = `
-    <strong>${entry.number}</strong><br>
-    <small>
-      ${entry.valid ? "✅ Valid" : "❌ Invalid"} |
-      ${entry.type || "Unknown Type"} |
-      ${entry.carrier || "Unknown Carrier"}
-    </small>
-  `;
-
-  if (!entry.valid) li.style.color = "red";
-
-  li.onclick = () =>
-    navigator.clipboard.writeText(entry.number).then(() =>
-      showToast(`📋 Copied ${entry.number}`)
-    );
-
-  resultsList.appendChild(li);
-});
-
-    });
-
-    updateStats();
-    showToast("✅ AI extraction complete");
-  } catch (err) {
-    console.error(err);
-    showToast("❌ AI extraction failed", "#dc3545");
-  }
-};
-  </script>
+</script>
 </body>
 </html>
