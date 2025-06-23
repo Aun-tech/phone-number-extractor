@@ -345,6 +345,42 @@
       Toastify({ text: "❌ AI extraction failed", duration: 3000, backgroundColor: "#dc3545" }).showToast();
     }
   };
+    const aiExtractBtn = document.getElementById("aiExtractBtn");
+
+aiExtractBtn.onclick = async () => {
+  const input = inputText.value.trim();
+  if (!input) return showToast("Please enter some text", "#dc3545");
+
+  showToast("🔍 AI analyzing numbers...");
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/ai-extract", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: input })
+    });
+
+    const data = await res.json();
+    if (data.error || !data.numbers) throw new Error(data.error || "AI extraction failed");
+
+    extractedNumbers = data.numbers.map(n => n.number);
+
+    resultsList.innerHTML = "";
+    data.numbers.forEach(entry => {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${entry.number}</strong><br>
+        <small>${entry.valid ? "✅ Valid" : "❌ Invalid"} | ${entry.type} | ${entry.carrier || "Unknown carrier"}</small>`;
+      if (!entry.valid) li.style.color = "red";
+      resultsList.appendChild(li);
+    });
+
+    updateStats();
+    showToast("✅ AI extraction complete");
+  } catch (err) {
+    console.error(err);
+    showToast("❌ AI extraction failed", "#dc3545");
+  }
+};
   </script>
 </body>
 </html>
