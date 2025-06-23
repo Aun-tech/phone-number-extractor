@@ -366,12 +366,28 @@ aiExtractBtn.onclick = async () => {
     extractedNumbers = data.numbers.map(n => n.number);
 
     resultsList.innerHTML = "";
-    data.numbers.forEach(entry => {
-      const li = document.createElement("li");
-      li.innerHTML = `<strong>${entry.number}</strong><br>
-        <small>${entry.valid ? "✅ Valid" : "❌ Invalid"} | ${entry.type} | ${entry.carrier || "Unknown carrier"}</small>`;
-      if (!entry.valid) li.style.color = "red";
-      resultsList.appendChild(li);
+   data.numbers.forEach(entry => {
+  const li = document.createElement("li");
+
+  li.innerHTML = `
+    <strong>${entry.number}</strong><br>
+    <small>
+      ${entry.valid ? "✅ Valid" : "❌ Invalid"} |
+      ${entry.type || "Unknown Type"} |
+      ${entry.carrier || "Unknown Carrier"}
+    </small>
+  `;
+
+  if (!entry.valid) li.style.color = "red";
+
+  li.onclick = () =>
+    navigator.clipboard.writeText(entry.number).then(() =>
+      showToast(`📋 Copied ${entry.number}`)
+    );
+
+  resultsList.appendChild(li);
+});
+
     });
 
     updateStats();
