@@ -179,6 +179,7 @@
         </div>
       </div>
       <button class="btn btn-secondary" id="themeToggle">🌚 Toggle Theme</button>
+      <button class="btn btn-secondary" id="aiExtractBtn">🌍 AI Extract Numbers</button>
       <button class="btn btn-primary" id="showDuplicatesBtn">🔁 Show Duplicates Only</button>
     </div>
     <input type="text" id="searchInput" placeholder="🔍 Filter results">
@@ -316,6 +317,33 @@
       displayResults(extractedNumbers);
       showToast(showingDuplicatesOnly ? "🔁 Showing duplicates only" : "📄 Showing all numbers");
     };
+      document.getElementById("aiExtractBtn").onclick = async () => {
+    const text = document.getElementById("inputText").value;
+    if (!text.trim()) return Toastify({ text: "❌ Please paste some text first", duration: 3000, backgroundColor: "#dc3545" }).showToast();
+
+    Toastify({ text: "🧠 AI processing started...", duration: 3000, backgroundColor: "#28a745" }).showToast();
+
+    try {
+      const response = await fetch("http://localhost:5000/ai-extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      const data = await response.json();
+      if (data.numbers && data.numbers.length > 0) {
+        extractedNumbers = data.numbers;
+        displayResults(extractedNumbers);
+        updateStats();
+        Toastify({ text: `✅ ${data.numbers.length} numbers found`, duration: 3000, backgroundColor: "#28a745" }).showToast();
+      } else {
+        Toastify({ text: "⚠️ No valid numbers found", duration: 3000, backgroundColor: "#ffc107" }).showToast();
+      }
+    } catch (error) {
+      console.error("AI Error:", error);
+      Toastify({ text: "❌ AI extraction failed", duration: 3000, backgroundColor: "#dc3545" }).showToast();
+    }
+  };
   </script>
 </body>
 </html>
