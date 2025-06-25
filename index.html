@@ -338,10 +338,41 @@ filterDuplicatesBtn.onclick = () => {
   if (uniqueDuplicates.length === 0) {
     showToast("No duplicates found", "#28a745");
   } else {
-    displayResults(uniqueDuplicates);
+    const countMap = {};
+extractedNumbers.forEach(num => {
+  countMap[num] = (countMap[num] || 0) + 1;
+});
+
+const duplicates = extractedNumbers.filter(num => countMap[num] > 1);
+const uniqueDuplicates = [...new Set(duplicates)];
+
+if (uniqueDuplicates.length === 0) {
+  showToast("No duplicates found", "#28a745");
+} else {
+  displayResultsWithCount(uniqueDuplicates, countMap);
+  statsDisplay.textContent = `${uniqueDuplicates.length} duplicate number(s)`;
+  showToast("🔁 Showing duplicates only");
+}
     statsDisplay.textContent = `${uniqueDuplicates.length} duplicate number(s)`;
     showToast("🔁 Showing duplicates only");
   }
+};
+    const displayResultsWithCount = (numbers, countMap) => {
+  resultsList.innerHTML = "";
+  numbers.forEach(num => {
+    const li = document.createElement("li");
+    const count = countMap[num];
+    li.textContent = num;
+    if (count > 1) {
+      li.classList.add("duplicate");
+      const badge = document.createElement("span");
+      badge.textContent = `${count}x`;
+      badge.style.color = "#dc3545";
+      li.appendChild(badge);
+    }
+    li.onclick = () => navigator.clipboard.writeText(num).then(() => showToast(`📋 Copied ${num}`));
+    resultsList.appendChild(li);
+  });
 };
   </script>
 </body>
