@@ -1,112 +1,189 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>📞 SmartPak Number Extractor</title>
-  <!-- Google Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Toastify CSS -->
   <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
+    :root {
+      --primary: #007bff;
+      --accent: #28a745;
+      --bg-light: #f9fafe;
+      --bg-dark: #111;
+      --text-light: #fff;
+      --text-dark: #222;
+      --highlight: #c9f2ff;
+      --duplicate: #ffe0e0;
     }
+
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      background: #f0f4f8;
-      color: #333;
-      padding: 2rem;
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
+
+    .dark-mode {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+    }
+
     .container {
-      max-width: 900px;
-      margin: auto;
+      max-width: 920px;
+      margin: 3rem auto;
       background: #fff;
       padding: 2rem;
       border-radius: 16px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      transition: background 0.3s ease;
     }
+    .dark-mode .container { background: #1e1e1e; }
+
     h1 {
       text-align: center;
-      color: #007bff;
+      color: var(--primary);
+      font-weight: 700;
       margin-bottom: 1.5rem;
     }
-    textarea, input[type="file"] {
-      width: 100%;
+
+    textarea, input[type="file"], input[type="text"] {
+      width: calc(100% - 42px);
       padding: 1rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
       margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
       font-size: 1rem;
+      background-color: inherit;
+      color: inherit;
     }
-    .btn {
-      display: inline-block;
-      margin: 0.4rem;
-      padding: 0.7rem 1.4rem;
+
+    .clear-btn {
+      vertical-align: middle;
+      background: none;
+      border: none;
+      color: red;
+      font-size: 1.2rem;
+      cursor: pointer;
+      margin-left: 4px;
+    }
+
+    button.btn {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
       border: none;
       border-radius: 8px;
-      background-color: #007bff;
-      color: white;
-      font-size: 0.95rem;
       cursor: pointer;
-      transition: 0.2s ease;
+      margin: 0.4rem;
+      transition: transform 0.2s ease;
     }
-    .btn:hover {
-      background-color: #0056b3;
+    button.btn:hover { transform: scale(1.05); }
+
+    .btn-primary { background-color: var(--primary); color: #fff; }
+    .btn-secondary { background-color: var(--accent); color: #fff; }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
     }
-    .output-section {
-      margin-top: 2rem;
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+      border-radius: 8px;
+      overflow: hidden;
+      z-index: 1;
+      min-width: 160px;
     }
+
+    .dropdown-content button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .dropdown-content button:hover {
+      background-color: #f1f1f1;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
     .results {
-      background: #eef2f7;
-      border-radius: 10px;
+      background: #f1f3f5;
       padding: 1rem;
+      border-radius: 10px;
       max-height: 250px;
       overflow-y: auto;
       font-family: monospace;
-      margin-bottom: 1rem;
     }
+
+    .dark-mode .results {
+      background: #2c2c2c;
+      color: #e6e6e6;
+    }
+
     .results li {
       padding: 0.5rem;
       border-bottom: 1px solid #ddd;
+      cursor: pointer;
       display: flex;
       justify-content: space-between;
     }
+
     .results li.duplicate {
-      background-color: #ffe0e0;
-      font-weight: bold;
+      background: var(--duplicate);
+      font-weight: 600;
     }
-    .btn-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
+
+    .dark-mode .results li.duplicate {
+      background: #4b2c2c;
     }
-    .instructions {
+
+    .stats, .footer {
+      text-align: center;
+      color: #888;
       font-size: 0.9rem;
-      background: #fffbea;
-      border: 1px solid #ffe58f;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1.5rem;
-      color: #805600;
+      margin-top: 1rem;
     }
+
+    .dark-mode .stats, .dark-mode .footer {
+      color: #aaa;
+    }
+
+    .floating-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 1rem;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.5rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
     @media (max-width: 600px) {
-      .btn-group { flex-direction: column; }
+      .container { margin: 1rem; padding: 1rem; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container animate__animated animate__fadeIn">
     <h1>📞 SmartPak Number Extractor</h1>
-
-    <div class="instructions">
-      <strong>How to Use:</strong><br>
-      1. Paste or upload text containing Pakistani phone numbers.<br>
-      2. Click "Extract Numbers" to find all valid phone numbers.<br>
-      3. Use buttons to copy, filter duplicates, or view all.<br>
-    </div>
     <input type="file" id="fileInput">
     <div style="display: flex; align-items: center;">
       <textarea id="inputText" placeholder="Paste text containing phone numbers..."></textarea>
