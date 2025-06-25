@@ -190,6 +190,7 @@
     </div>
     <div>
       <button class="btn btn-primary" id="extractBtn">Extract</button>
+      <button class="btn btn-primary" id="filterDuplicatesBtn">🔁 Filter Duplicates</button>
       <button class="btn btn-secondary" id="copyBtn">📋 Copy</button>
       <div class="dropdown">
         <button class="btn btn-primary" id="exportBtn">📦 Export</button>
@@ -321,6 +322,27 @@
       reader.onload = () => inputText.value = reader.result;
       reader.readAsText(e.target.files[0]);
     };
+    const filterDuplicatesBtn = document.getElementById("filterDuplicatesBtn");
+
+filterDuplicatesBtn.onclick = () => {
+  if (!extractedNumbers.length) return showToast("Nothing to filter", "#dc3545");
+
+  const countMap = {};
+  extractedNumbers.forEach(num => {
+    countMap[num] = (countMap[num] || 0) + 1;
+  });
+
+  const duplicates = extractedNumbers.filter(num => countMap[num] > 1);
+  const uniqueDuplicates = [...new Set(duplicates)];
+
+  if (uniqueDuplicates.length === 0) {
+    showToast("No duplicates found", "#28a745");
+  } else {
+    displayResults(uniqueDuplicates);
+    statsDisplay.textContent = `${uniqueDuplicates.length} duplicate number(s)`;
+    showToast("🔁 Showing duplicates only");
+  }
+};
   </script>
 </body>
 </html>
